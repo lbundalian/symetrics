@@ -1,0 +1,10 @@
+setup.py
+symetrics/__init__.py
+symetrics/symetrics_api.py
+symetrics.egg-info/PKG-INFO
+symetrics.egg-info/SOURCES.txt
+symetrics.egg-info/dependency_links.txt
+symetrics.egg-info/requires.txt
+symetrics.egg-info/top_level.txt
+symetrics/src/__init__.py
+symetrics/src/datastruct.py

@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: symetrics
+Version: 1.1.0
+Summary: Symetrics API
+Author: Linnaeus Bundalian
+Author-email: linnaeusbundalian@gmail.com
+Keywords: python,synonymous variants
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Education
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+
+A package to access SYMETRICS database. 
+SYMETRICS database is a consolidation of metrics for synonymous variants which were derived from a number of computational tools each of which contributing to 
+attribute specific metrics such as SYNVEP for general functional constraints, SpliceAI for splicing effect, SILVA for obtaining GERP++ (phylogenetic related constraints)
+CpG/CpG_Exon, dRSCU/RSCU for codon usage and SURF for rna stability. The package also includes a result of the analysis of the influence of each variants exceeding set threshold
+per metrics defined constituting to a score assigned to a gene
