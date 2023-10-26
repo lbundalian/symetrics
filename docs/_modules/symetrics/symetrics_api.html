@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>symetrics.symetrics_api &mdash; symetrics 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            symetrics
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">symetrics</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">symetrics.symetrics_api</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for symetrics.symetrics_api</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">from</span> <span class="nn">sqlite3</span> <span class="kn">import</span> <span class="n">Error</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span><span class="n">auto</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">.src.datastruct</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="k">class</span> <span class="nc">ISymetrics</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">connect_to_database</span><span class="p">():</span>
+       <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">get_silva_score</span><span class="p">():</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">get_surf_score</span><span class="p">():</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">get_synvep_score</span><span class="p">():</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">get_spliceai_score</span><span class="p">():</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">get_prop_score</span><span class="p">():</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">get_gnomad_data</span><span class="p">():</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">get_gnomad_constraints</span><span class="p">():</span>
+        <span class="k">pass</span>
+
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractclassmethod</span>
+    <span class="k">def</span> <span class="nf">liftover</span><span class="p">():</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Symetrics"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics">[docs]</a><span class="k">class</span> <span class="nc">Symetrics</span><span class="p">(</span><span class="n">ISymetrics</span><span class="p">):</span>
+
+    <span class="n">_db</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_conn</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_db</span> <span class="o">=</span> <span class="n">db</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_to_database</span><span class="p">()</span>    
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection to f</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="si">}</span><span class="s2"> is successful&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Symetrics.connect_to_database"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics.connect_to_database">[docs]</a>    <span class="k">def</span> <span class="nf">connect_to_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        This initalize the connection of the symetrics database set when an instance of the class is created</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            None</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            conn: an sqlite3 connection object linked to the symetrics database </span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="n">conn</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">conn</span>
+        <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection to f</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="si">}</span><span class="s2"> failed&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">conn</span></div>
+    
+<div class="viewcode-block" id="Symetrics.get_silva_score"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics.get_silva_score">[docs]</a>    <span class="k">def</span> <span class="nf">get_silva_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">variant</span><span class="p">:</span> <span class="n">VariantObject</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        Get the RSCU, dRSCU, GERP and CpG/CpG_Exon of a given variant (reference: hg19)</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            silva_scores: A dictionary returning the scores along with the variant information.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; from symetrics import *</span>
+<span class="sd">            &gt;&gt;&gt; symetrics = Symetrics(&#39;symetrics.db&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; variant = VariantObject(chr=&#39;7&#39;,pos=&#39;91763673&#39;,ref=&#39;C&#39;,alt=&#39;A&#39;,genome=GenomeReference.hg19)</span>
+<span class="sd">            &gt;&gt;&gt; silva = symetrics.get_silva_scores(variant)</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">silva_scores</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># dont forget silva is hg19</span>
+            <span class="n">silva_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">silva_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SELECT &quot;#chrom&quot; AS CHR,pos AS POS,ref AS REF,alt AS ALT,gene AS GENE,&quot;#RSCU&quot; AS RSCU,dRSCU,&quot;#GERP++&quot; AS GERP,&quot;#CpG?&quot; AS CPG,CpG_exon AS CPGX FROM SILVA WHERE &quot;#chrom&quot; = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_chr</span><span class="si">}</span><span class="s1"> AND pos = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_pos</span><span class="si">}</span><span class="s1"> AND ref = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_ref</span><span class="si">}</span><span class="s1">&quot; AND alt = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_alt</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">silva_cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">silva_query</span><span class="p">)</span>
+            <span class="n">silva_rows</span> <span class="o">=</span> <span class="n">silva_cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="n">silva_scores</span> <span class="o">=</span> <span class="n">silva_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">silva_scores</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;CHR&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot;POS&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="s2">&quot;REF&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="s2">&quot;ALT&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s2">&quot;GENE&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+                <span class="s2">&quot;RSCU&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s2">&quot;dRSCU&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span>
+                <span class="s2">&quot;GERP&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>
+                <span class="s2">&quot;CPG&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span>
+                <span class="s2">&quot;CPGX&quot;</span><span class="p">:</span> <span class="n">silva_scores</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+            <span class="p">}</span>
+
+        <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="si">}</span><span class="s2"> failed&quot;</span><span class="p">)</span>
+        
+
+
+        <span class="k">return</span> <span class="n">silva_scores</span></div>
+
+<div class="viewcode-block" id="Symetrics.get_surf_score"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics.get_surf_score">[docs]</a>    <span class="k">def</span> <span class="nf">get_surf_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">variant</span><span class="p">:</span> <span class="n">VariantObject</span><span class="p">):</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        Get the SURF a given variant (reference: hg38)</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            surf_scores: A dictionary returning the scores along with the variant information.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; from symetrics import *</span>
+<span class="sd">            &gt;&gt;&gt; symetrics = Symetrics(&#39;symetrics.db&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; variant = VariantObject(chr=&#39;7&#39;,pos=&#39;91763673&#39;,ref=&#39;C&#39;,alt=&#39;A&#39;,genome=GenomeReference.hg38)</span>
+<span class="sd">            &gt;&gt;&gt; surf = symetrics.get_surf_score(variant)</span>
+<span class="sd">        </span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">surf_scores</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># SURF is hg38</span>
+            <span class="n">surf_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">surf_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SELECT CHR,POS,REF,ALT,GENE,SURF FROM SURF WHERE CHR = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_chr</span><span class="si">}</span><span class="s1"> AND POS = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_pos</span><span class="si">}</span><span class="s1"> AND REF = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_ref</span><span class="si">}</span><span class="s1">&quot; AND ALT = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_alt</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">surf_cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">surf_query</span><span class="p">)</span>
+            <span class="n">surf_rows</span> <span class="o">=</span> <span class="n">surf_cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="n">surf_scores</span> <span class="o">=</span> <span class="n">surf_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">surf_scores</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;CHR&quot;</span><span class="p">:</span> <span class="n">surf_scores</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot;POS&quot;</span><span class="p">:</span> <span class="n">surf_scores</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="s2">&quot;REF&quot;</span><span class="p">:</span> <span class="n">surf_scores</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="s2">&quot;ALT&quot;</span><span class="p">:</span> <span class="n">surf_scores</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s2">&quot;SURF&quot;</span><span class="p">:</span> <span class="n">surf_scores</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="si">}</span><span class="s2"> failed&quot;</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">surf_scores</span></div>
+    
+<div class="viewcode-block" id="Symetrics.get_synvep_score"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics.get_synvep_score">[docs]</a>    <span class="k">def</span> <span class="nf">get_synvep_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">variant</span><span class="p">:</span> <span class="n">VariantObject</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        Get the SYNVEP a given variant (reference: hg38/hg19)</span>
+<span class="sd">        https://services.bromberglab.org/synvep/home</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            synvep_scores: A dictionary returning the scores along with the variant information.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; from symetrics import *</span>
+<span class="sd">            &gt;&gt;&gt; symetrics = Symetrics(&#39;symetrics.db&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; variant_hg19 = VariantObject(chr=&#39;7&#39;,pos=&#39;91763673&#39;,ref=&#39;C&#39;,alt=&#39;A&#39;,genome=GenomeReference.hg19)</span>
+<span class="sd">            &gt;&gt;&gt; variant_hg38 = VariantObject(chr=&#39;7&#39;,pos=&#39;91763673&#39;,ref=&#39;C&#39;,alt=&#39;A&#39;,genome=GenomeReference.hg38)</span>
+<span class="sd">            &gt;&gt;&gt; synvep_hg19 = symetrics.get_synvep_score(variant_hg19)</span>
+<span class="sd">            &gt;&gt;&gt; synvep_hg38 = symetrics.get_synvep_score(variant_hg38)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">synvep_scores</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># synvep is hg38 (pos_GRCh38) abd hg19 (pos)</span>
+            <span class="n">synvep_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">synvep_query</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">variant</span><span class="o">.</span><span class="n">_genome</span> <span class="o">==</span> <span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg38</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">synvep_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_chr</span><span class="si">}</span><span class="s1"> AND pos_GRCh38 = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_pos</span><span class="si">}</span><span class="s1"> AND ref = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_ref</span><span class="si">}</span><span class="s1">&quot; AND alt = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_alt</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="k">elif</span> <span class="n">variant</span><span class="o">.</span><span class="n">_genome</span> <span class="o">==</span> <span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg19</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">synvep_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_chr</span><span class="si">}</span><span class="s1"> AND pos_GRCh38 = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_pos</span><span class="si">}</span><span class="s1"> AND ref = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_ref</span><span class="si">}</span><span class="s1">&quot; AND alt = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_alt</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">synvep_cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">synvep_query</span><span class="p">)</span>
+            <span class="n">synvep_rows</span> <span class="o">=</span> <span class="n">synvep_cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="n">synvep_scores</span> <span class="o">=</span> <span class="n">synvep_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">synvep_scores</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;CHR&quot;</span><span class="p">:</span> <span class="n">synvep_scores</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot;POS&quot;</span><span class="p">:</span> <span class="n">synvep_scores</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="s2">&quot;REF&quot;</span><span class="p">:</span> <span class="n">synvep_scores</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="s2">&quot;ALT&quot;</span><span class="p">:</span> <span class="n">synvep_scores</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s2">&quot;GENE&quot;</span><span class="p">:</span> <span class="n">synvep_scores</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+                <span class="s2">&quot;SYNVEP&quot;</span><span class="p">:</span> <span class="n">synvep_scores</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+            <span class="p">}</span>
+        <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="si">}</span><span class="s2"> failed&quot;</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">synvep_scores</span></div>
+
+<div class="viewcode-block" id="Symetrics.get_spliceai_score"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics.get_spliceai_score">[docs]</a>    <span class="k">def</span> <span class="nf">get_spliceai_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variant</span><span class="p">:</span> <span class="n">VariantObject</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        Get the SpliceAI a given variant (reference: hg38)</span>
+<span class="sd">        https://spliceailookup.broadinstitute.org/</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            spliceai_score: A dictionary returning the scores along with the variant information.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; from symetrics import *</span>
+<span class="sd">            &gt;&gt;&gt; symetrics = Symetrics(&#39;symetrics.db&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; variant = VariantObject(chr=&#39;7&#39;,pos=&#39;91763673&#39;,ref=&#39;C&#39;,alt=&#39;A&#39;,genome=GenomeReference.hg38)</span>
+<span class="sd">            &gt;&gt;&gt; spliceai = symetrics.get_spliceai_score(variant)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+                        
+        <span class="n">spliceai_score</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># synvep is hg38 (pos_GRCh38) abd hg19 (pos)</span>
+            <span class="n">spliceai_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">spliceai_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, INFO FROM SPLICEAI WHERE chr = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_chr</span><span class="si">}</span><span class="s1"> AND pos = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_pos</span><span class="si">}</span><span class="s1"> AND ref = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_ref</span><span class="si">}</span><span class="s1">&quot; AND alt = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_alt</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">spliceai_cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">spliceai_query</span><span class="p">)</span>
+            <span class="n">spliceai_rows</span> <span class="o">=</span> <span class="n">spliceai_cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="n">spliceai_score</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">spliceai_rows</span><span class="p">)</span>
+            <span class="n">spliceai_score</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CHR&#39;</span><span class="p">,</span><span class="s1">&#39;POS&#39;</span><span class="p">,</span><span class="s1">&#39;REF&#39;</span><span class="p">,</span><span class="s1">&#39;ALT&#39;</span><span class="p">,</span><span class="s1">&#39;INFO&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">spliceai_score</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">vcf_header</span> <span class="o">=</span> <span class="s2">&quot;ALLELE|SYMBOL|DS_AG|DS_AL|DS_DG|DS_DL|DP_AG|DP_AL|DP_DG|DP_DL&quot;</span>
+                <span class="n">vcf_header</span> <span class="o">=</span> <span class="n">vcf_header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+                <span class="n">spliceai_score</span><span class="p">[</span><span class="n">vcf_header</span><span class="p">]</span> <span class="o">=</span> <span class="n">spliceai_score</span><span class="p">[</span><span class="s1">&#39;INFO&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">spliceai_score</span><span class="p">[</span><span class="s1">&#39;MAX_DS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spliceai_score</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;DS_AG&#39;</span><span class="p">],</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;DS_AL&#39;</span><span class="p">],</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;DS_DG&#39;</span><span class="p">],</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;DS_DL&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">spliceai_score</span> <span class="o">=</span> <span class="n">spliceai_score</span><span class="p">[[</span><span class="s1">&#39;CHR&#39;</span><span class="p">,</span><span class="s1">&#39;POS&#39;</span><span class="p">,</span><span class="s1">&#39;REF&#39;</span><span class="p">,</span><span class="s1">&#39;ALT&#39;</span><span class="p">,</span><span class="s1">&#39;MAX_DS&#39;</span><span class="p">]]</span>
+                <span class="n">spliceai_score</span> <span class="o">=</span> <span class="n">spliceai_score</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="si">}</span><span class="s2"> failed&quot;</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">spliceai_score</span></div>
+
+
+<div class="viewcode-block" id="Symetrics.get_prop_score"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics.get_prop_score">[docs]</a>    <span class="k">def</span> <span class="nf">get_prop_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">group</span> <span class="o">=</span> <span class="n">MetricsGroup</span><span class="o">.</span><span class="n">SYNVEP</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">gene</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        Get the SYMETRICS score for a given gene abd metrics group. The score was calculated from the pooled z proportion test of different</span>
+<span class="sd">        metrics group with their corresponding threhold:</span>
+<span class="sd">            - SYNVEP: 0.5</span>
+<span class="sd">            - GERP: 4</span>
+<span class="sd">            - CpG: </span>
+<span class="sd">            - CpG_exon: 1</span>
+<span class="sd">            - RSCU:</span>
+<span class="sd">            - dRSCU:</span>
+<span class="sd">            - SpliceAI: 0.8</span>
+<span class="sd">            - SURF: 0.3</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            gene: A string representing the HGNC Symbol of a gene</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            scores: A dictionary returning the pvalues and fdr acquired from the test and the score before and after scaling.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; from symetrics import *</span>
+<span class="sd">            &gt;&gt;&gt; symetrics = Symetrics(&#39;symetrics.db&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; score = symetrics.get_prop_score(group = &#39;SYNVEP&#39;,gene = &#39;A1BG&#39;)</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">scores</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">MetricsGroup</span><span class="o">.</span><span class="n">__members__</span><span class="p">:</span>
+            <span class="k">match</span> <span class="n">group</span><span class="p">:</span>
+                <span class="k">case</span> <span class="n">MetricsGroup</span><span class="o">.</span><span class="n">SYNVEP</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data/</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">_DATA.csv&quot;</span><span class="p">)</span>
+                    <span class="n">scaled_scores</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">scores</span><span class="p">[[</span><span class="s1">&#39;z_ne&#39;</span><span class="p">]])</span>
+                    <span class="n">scores</span><span class="p">[</span><span class="s1">&#39;scaled_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaled_scores</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">scores</span><span class="o">.</span><span class="n">GENE</span> <span class="o">==</span>  <span class="n">gene</span><span class="p">]</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[[</span><span class="s1">&#39;GENE&#39;</span><span class="p">,</span><span class="s1">&#39;pval_ne&#39;</span><span class="p">,</span><span class="s1">&#39;fdr_ne&#39;</span><span class="p">,</span><span class="s1">&#39;z_ne&#39;</span><span class="p">,</span><span class="s1">&#39;scaled_z&#39;</span><span class="p">]]</span>
+                    <span class="n">scores</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;GENE&#39;</span><span class="p">,</span><span class="s1">&#39;PVAL&#39;</span><span class="p">,</span><span class="s1">&#39;FDR&#39;</span><span class="p">,</span><span class="s1">&#39;SYMETRIC_SCORE&#39;</span><span class="p">,</span><span class="s1">&#39;NORM_SYMETRIC_SCORE&#39;</span><span class="p">]</span>
+                    <span class="n">scores</span><span class="p">[</span><span class="s1">&#39;GROUP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+                <span class="k">case</span> <span class="n">MetricsGroup</span><span class="o">.</span><span class="n">SURF</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data/</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">_DATA.csv&quot;</span><span class="p">)</span>
+                    <span class="n">scaled_scores</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">scores</span><span class="p">[[</span><span class="s1">&#39;z&#39;</span><span class="p">]])</span>
+                    <span class="n">scores</span><span class="p">[</span><span class="s1">&#39;scaled_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaled_scores</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">scores</span><span class="o">.</span><span class="n">GENES</span> <span class="o">==</span>  <span class="n">gene</span><span class="p">]</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[[</span><span class="s1">&#39;GENES&#39;</span><span class="p">,</span><span class="s1">&#39;pval&#39;</span><span class="p">,</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;scaled_z&#39;</span><span class="p">]]</span>
+                    <span class="n">scores</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;GENE&#39;</span><span class="p">,</span><span class="s1">&#39;PVAL&#39;</span><span class="p">,</span><span class="s1">&#39;FDR&#39;</span><span class="p">,</span><span class="s1">&#39;SYMETRIC_SCORE&#39;</span><span class="p">,</span><span class="s1">&#39;NORM_SYMETRIC_SCORE&#39;</span><span class="p">]</span>
+                    <span class="n">scores</span><span class="p">[</span><span class="s1">&#39;GROUP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data/</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">_DATA.csv&quot;</span><span class="p">)</span>
+                    <span class="n">scaled_scores</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">scores</span><span class="p">[[</span><span class="s1">&#39;z&#39;</span><span class="p">]])</span>
+                    <span class="n">scores</span><span class="p">[</span><span class="s1">&#39;scaled_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaled_scores</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[</span><span class="n">scores</span><span class="o">.</span><span class="n">GENE</span> <span class="o">==</span>  <span class="n">gene</span><span class="p">]</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="p">[[</span><span class="s1">&#39;GENE&#39;</span><span class="p">,</span><span class="s1">&#39;pval&#39;</span><span class="p">,</span><span class="s1">&#39;fdr&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;scaled_z&#39;</span><span class="p">]]</span>
+                    <span class="n">scores</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;GENE&#39;</span><span class="p">,</span><span class="s1">&#39;PVAL&#39;</span><span class="p">,</span><span class="s1">&#39;FDR&#39;</span><span class="p">,</span><span class="s1">&#39;SYMETRIC_SCORE&#39;</span><span class="p">,</span><span class="s1">&#39;NORM_SYMETRIC_SCORE&#39;</span><span class="p">]</span>
+                    <span class="n">scores</span><span class="p">[</span><span class="s1">&#39;GROUP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Group: </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s1"> is not valid&#39;</span><span class="p">)</span>       
+    
+        <span class="k">return</span> <span class="n">scores</span></div>
+
+<div class="viewcode-block" id="Symetrics.get_gnomad_data"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics.get_gnomad_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_gnomad_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variant</span><span class="p">:</span> <span class="n">VariantObject</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        Get the gnomad information related to the alleles of the given variant (allele count, allele number and allele frequency)</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            gnomad_data: A dictionary containing the AC, AN, AF and variant information</span>
+<span class="sd">        </span>
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; from symetrics import *</span>
+<span class="sd">            &gt;&gt;&gt; symetrics = Symetrics(&#39;symetrics.db&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; variant_hg19 = VariantObject(chr=&#39;7&#39;,pos=&#39;91763673&#39;,ref=&#39;C&#39;,alt=&#39;A&#39;,genome=GenomeReference.hg19)</span>
+<span class="sd">            &gt;&gt;&gt; variant_hg38 = VariantObject(chr=&#39;7&#39;,pos=&#39;91763673&#39;,ref=&#39;C&#39;,alt=&#39;A&#39;,genome=GenomeReference.hg38)</span>
+<span class="sd">            &gt;&gt;&gt; gnomad_hg19 = symetrics.get_gnomad_data(variant_hg19)</span>
+<span class="sd">            &gt;&gt;&gt; gnomad_hg38 = symetrics.get_gnomad_data(variant_hg38)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="n">gnomad_conn</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">gnomad_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">variant</span><span class="o">.</span><span class="n">_genome</span> <span class="o">==</span> <span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg19</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">gnomad_conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_to_database</span><span class="p">(</span><span class="s1">&#39;data/gnomad2/gnomad_db.sqlite3&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">variant</span><span class="o">.</span><span class="n">_genome</span> <span class="o">==</span> <span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg38</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">gnomad_conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect_to_database</span><span class="p">(</span><span class="s1">&#39;data/gnomad3/gnomad_db.sqlite3&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">gnomad_cursor</span> <span class="o">=</span> <span class="n">gnomad_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">gnomad_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, AC, AN, AF FROM gnomad_db WHERE chr = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_chr</span><span class="si">}</span><span class="s1"> AND pos = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_pos</span><span class="si">}</span><span class="s1"> AND ref = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_ref</span><span class="si">}</span><span class="s1">&quot; AND alt = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_alt</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">gnomad_cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">gnomad_query</span><span class="p">)</span>
+            <span class="n">gnomad_rows</span> <span class="o">=</span> <span class="n">gnomad_cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="n">gnomad_data</span> <span class="o">=</span> <span class="n">gnomad_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">gnomad_data</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;CHR&quot;</span><span class="p">:</span> <span class="n">gnomad_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot;POS&quot;</span><span class="p">:</span> <span class="n">gnomad_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="s2">&quot;REF&quot;</span><span class="p">:</span> <span class="n">gnomad_data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="s2">&quot;ALT&quot;</span><span class="p">:</span> <span class="n">gnomad_data</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                <span class="s2">&quot;AC&quot;</span><span class="p">:</span> <span class="n">gnomad_data</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+                <span class="s2">&quot;AN&quot;</span><span class="p">:</span> <span class="n">gnomad_data</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span>
+                <span class="s2">&quot;AF&quot;</span><span class="p">:</span> <span class="n">gnomad_data</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+            <span class="p">}</span>
+
+        <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection to Gnomad failed&quot;</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">gnomad_data</span></div>
+
+<div class="viewcode-block" id="Symetrics.get_gnomad_constraints"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics.get_gnomad_constraints">[docs]</a>    <span class="k">def</span> <span class="nf">get_gnomad_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">gene</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        Get the constraints from gnomad (synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance) of a given gene</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            gene: A string representing the HGNC Symbol of a gene</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            gnomad_data: A dictionary of the synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance)</span>
+<span class="sd">        </span>
+<span class="sd">        Examples:</span>
+
+<span class="sd">            &gt;&gt;&gt; from symetrics import *</span>
+<span class="sd">            &gt;&gt;&gt; symetrics = Symetrics(&#39;symetrics.db&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; gnomad = symetrics.get_gnomad_constraints(gene = &#39;A1BG&#39;)</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">gnomad_data</span> <span class="o">=</span>  <span class="kc">None</span>
+        <span class="n">gnomad_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">gnomad_data</span> <span class="o">=</span> <span class="n">gnomad_data</span><span class="p">[[</span><span class="s1">&#39;gene&#39;</span><span class="p">,</span><span class="s1">&#39;transcript&#39;</span><span class="p">,</span><span class="s1">&#39;syn_z&#39;</span><span class="p">,</span><span class="s1">&#39;mis_z&#39;</span><span class="p">,</span><span class="s1">&#39;lof_z&#39;</span><span class="p">,</span><span class="s1">&#39;pLI&#39;</span><span class="p">]]</span>
+        <span class="n">gnomad_data</span> <span class="o">=</span>  <span class="n">gnomad_data</span><span class="p">[</span><span class="n">gnomad_data</span><span class="o">.</span><span class="n">gene</span> <span class="o">==</span> <span class="n">gene</span><span class="p">]</span>
+        <span class="n">gnomad_data</span> <span class="o">=</span> <span class="n">gnomad_data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gnomad_data</span></div>
+
+<div class="viewcode-block" id="Symetrics.liftover"><a class="viewcode-back" href="../../index.html#symetrics.Symetrics.liftover">[docs]</a>    <span class="k">def</span> <span class="nf">liftover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">variant</span><span class="p">:</span> <span class="n">VariantObject</span><span class="p">):</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        </span>
+<span class="sd">        Perform a conversion of the variant position based from their original reference to a target reference. If hg38 is given, it will</span>
+<span class="sd">        be converted to hg19 and otherwise</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            liftover_variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant after liftover</span>
+<span class="sd">        </span>
+<span class="sd">        Exampless:</span>
+
+<span class="sd">            &gt;&gt;&gt; from symetrics import *</span>
+<span class="sd">            &gt;&gt;&gt; symetrics = Symetrics(&#39;symetrics.db&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; variant_hg19 = VariantObject(chr=&#39;7&#39;,pos=&#39;91763673&#39;,ref=&#39;C&#39;,alt=&#39;A&#39;,genome=GenomeReference.hg19)</span>
+<span class="sd">            &gt;&gt;&gt; variant_hg38 = symetrics_db.liftover(variant_hg19)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="n">liftover_variant</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># synvep is hg38 (pos_GRCh38) abd hg19 (pos)</span>
+            
+            <span class="n">synvep_cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">synvep_query</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">variant</span><span class="o">.</span><span class="n">_genome</span> <span class="o">==</span> <span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg38</span><span class="p">:</span>
+                <span class="n">new_reference</span> <span class="o">=</span> <span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg19</span>
+                <span class="n">synvep_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_chr</span><span class="si">}</span><span class="s1"> AND pos_GRCh38 = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_pos</span><span class="si">}</span><span class="s1"> AND ref = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_ref</span><span class="si">}</span><span class="s1">&quot; AND alt = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_alt</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="k">elif</span> <span class="n">variant</span><span class="o">.</span><span class="n">_genome</span> <span class="o">==</span> <span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg19</span><span class="p">:</span>
+                <span class="n">new_reference</span> <span class="o">=</span> <span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg38</span>
+                <span class="n">synvep_query</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_chr</span><span class="si">}</span><span class="s1"> AND pos = </span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_pos</span><span class="si">}</span><span class="s1"> AND ref = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_ref</span><span class="si">}</span><span class="s1">&quot; AND alt = &quot;</span><span class="si">{</span><span class="n">variant</span><span class="o">.</span><span class="n">_alt</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+            <span class="n">synvep_cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">synvep_query</span><span class="p">)</span>
+            <span class="n">synvep_rows</span> <span class="o">=</span> <span class="n">synvep_cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="n">variant_info</span> <span class="o">=</span> <span class="n">synvep_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">liftover_variant</span> <span class="o">=</span> <span class="n">VariantObject</span><span class="p">(</span>
+                <span class="nb">chr</span><span class="o">=</span><span class="n">variant_info</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">pos</span><span class="o">=</span><span class="n">variant_info</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">ref</span><span class="o">=</span><span class="n">variant_info</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                <span class="n">alt</span><span class="o">=</span><span class="n">variant_info</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                <span class="n">genome</span><span class="o">=</span><span class="n">new_reference</span>
+            <span class="p">)</span>
+            
+        <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connection to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="si">}</span><span class="s2"> failed&quot;</span><span class="p">)</span>
+    
+        <span class="k">return</span> <span class="n">liftover_variant</span></div></div>
+        
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Linnaeus Bundalian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
