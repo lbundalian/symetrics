@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '1.1.1' 
+VERSION = '2.0.0' 
 DESCRIPTION = 'Symetrics API'
 LONG_DESCRIPTION = '''A package to access SYMETRICS database. 
 SYMETRICS database is a consolidation of metrics for synonymous variants which were derived from a number of computational tools each of which contributing to 
@@ -19,6 +19,7 @@ setup(
         author="Linnaeus Bundalian",
         author_email="linnaeusbundalian@gmail.com",
         description=DESCRIPTION,
+        url="https://lbundalian.github.io/symetrics/",
         long_description=LONG_DESCRIPTION,
         packages=find_packages(),
         install_requires=REQUIRED_PACKAGES,

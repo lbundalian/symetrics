@@ -120,31 +120,39 @@
 <dt class="sig sig-object py" id="symetrics.Symetrics.get_gnomad_constraints">
 <span class="sig-name descname"><span class="pre">get_gnomad_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gene</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/symetrics/symetrics_api.html#Symetrics.get_gnomad_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symetrics.Symetrics.get_gnomad_constraints" title="Permalink to this definition"></a></dt>
 <dd><p>Get the constraints from gnomad (synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance) of a given gene</p>
-<p>Args:
-- gene: A string representing the HGNC Symbol of a gene</p>
-<p>Returns:
-- gnomad_data: A dictionary of the synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance)</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>gene: A string representing the HGNC Symbol of a gene</p>
+</dd>
+<dt>Returns:</dt><dd><p>gnomad_data: A dictionary of the synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance)</p>
+</dd>
+</dl>
 <p>Examples:</p>
-<p>from symetrics import *
-symetrics = Symetrics(‘symetrics.db’)
-gnomad = symetrics.get_gnomad_constraints(gene = ‘A1BG’)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">symetrics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">symetrics</span> <span class="o">=</span> <span class="n">Symetrics</span><span class="p">(</span><span class="s1">&#39;symetrics.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gnomad</span> <span class="o">=</span> <span class="n">symetrics</span><span class="o">.</span><span class="n">get_gnomad_constraints</span><span class="p">(</span><span class="n">gene</span> <span class="o">=</span> <span class="s1">&#39;A1BG&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="symetrics.Symetrics.get_gnomad_data">
 <span class="sig-name descname"><span class="pre">get_gnomad_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VariantObject</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/symetrics/symetrics_api.html#Symetrics.get_gnomad_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symetrics.Symetrics.get_gnomad_data" title="Permalink to this definition"></a></dt>
 <dd><p>Get the gnomad information related to the alleles of the given variant (allele count, allele number and allele frequency)</p>
-<p>Args:
-- variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
-<p>Returns:
-- gnomad_data: A dictionary containing the AC, AN, AF and variant information</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
+</dd>
+<dt>Returns:</dt><dd><p>gnomad_data: A dictionary containing the AC, AN, AF and variant information</p>
+</dd>
+</dl>
 <p>Examples:</p>
-<p>from symetrics import *
-symetrics = Symetrics(‘symetrics.db’)
-variant_hg19 = VariantObject(chr=’7’,pos=’91763673’,ref=’C’,alt=’A’,genome=GenomeReference.hg19)
-variant_hg38 = VariantObject(chr=’7’,pos=’91763673’,ref=’C’,alt=’A’,genome=GenomeReference.hg38)
-gnomad_hg19 = symetrics.get_gnomad_data(variant_hg19)
-gnomad_hg38 = symetrics.get_gnomad_data(variant_hg38)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">symetrics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">symetrics</span> <span class="o">=</span> <span class="n">Symetrics</span><span class="p">(</span><span class="s1">&#39;symetrics.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variant_hg19</span> <span class="o">=</span> <span class="n">VariantObject</span><span class="p">(</span><span class="nb">chr</span><span class="o">=</span><span class="s1">&#39;7&#39;</span><span class="p">,</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;91763673&#39;</span><span class="p">,</span><span class="n">ref</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="n">alt</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="n">genome</span><span class="o">=</span><span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg19</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variant_hg38</span> <span class="o">=</span> <span class="n">VariantObject</span><span class="p">(</span><span class="nb">chr</span><span class="o">=</span><span class="s1">&#39;7&#39;</span><span class="p">,</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;91763673&#39;</span><span class="p">,</span><span class="n">ref</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="n">alt</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="n">genome</span><span class="o">=</span><span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg38</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gnomad_hg19</span> <span class="o">=</span> <span class="n">symetrics</span><span class="o">.</span><span class="n">get_gnomad_data</span><span class="p">(</span><span class="n">variant_hg19</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gnomad_hg38</span> <span class="o">=</span> <span class="n">symetrics</span><span class="o">.</span><span class="n">get_gnomad_data</span><span class="p">(</span><span class="n">variant_hg38</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -164,29 +172,37 @@ metrics group with their corresponding threhold:</p>
 <li><p>SURF: 0.3</p></li>
 </ul>
 </div></blockquote>
-<p>Args:
-- gene: A string representing the HGNC Symbol of a gene</p>
-<p>Returns:
-- scores: A dictionary returning the pvalues and fdr acquired from the test and the score before and after scaling.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>gene: A string representing the HGNC Symbol of a gene</p>
+</dd>
+<dt>Returns:</dt><dd><p>scores: A dictionary returning the pvalues and fdr acquired from the test and the score before and after scaling.</p>
+</dd>
+</dl>
 <p>Examples:</p>
-<p>from symetrics import *
-symetrics = Symetrics(‘symetrics.db’)
-score = symetrics.get_prop_score(group = ‘SYNVEP’,gene = ‘A1BG’)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">symetrics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">symetrics</span> <span class="o">=</span> <span class="n">Symetrics</span><span class="p">(</span><span class="s1">&#39;symetrics.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">score</span> <span class="o">=</span> <span class="n">symetrics</span><span class="o">.</span><span class="n">get_prop_score</span><span class="p">(</span><span class="n">group</span> <span class="o">=</span> <span class="s1">&#39;SYNVEP&#39;</span><span class="p">,</span><span class="n">gene</span> <span class="o">=</span> <span class="s1">&#39;A1BG&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="symetrics.Symetrics.get_silva_score">
 <span class="sig-name descname"><span class="pre">get_silva_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VariantObject</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/symetrics/symetrics_api.html#Symetrics.get_silva_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symetrics.Symetrics.get_silva_score" title="Permalink to this definition"></a></dt>
 <dd><p>Get the RSCU, dRSCU, GERP and CpG/CpG_Exon of a given variant (reference: hg19)</p>
-<p>Args:
-- variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
-<p>Returns:
-- silva_scores: A dictionary returning the scores along with the variant information.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
+</dd>
+<dt>Returns:</dt><dd><p>silva_scores: A dictionary returning the scores along with the variant information.</p>
+</dd>
+</dl>
 <p>Examples:</p>
-<p>from symetrics import *
-symetrics = Symetrics(‘symetrics.db’)
-variant = VariantObject(chr=’7’,pos=’91763673’,ref=’C’,alt=’A’,genome=GenomeReference.hg19)
-silva = symetrics.get_silva_scores(variant)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">symetrics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">symetrics</span> <span class="o">=</span> <span class="n">Symetrics</span><span class="p">(</span><span class="s1">&#39;symetrics.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variant</span> <span class="o">=</span> <span class="n">VariantObject</span><span class="p">(</span><span class="nb">chr</span><span class="o">=</span><span class="s1">&#39;7&#39;</span><span class="p">,</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;91763673&#39;</span><span class="p">,</span><span class="n">ref</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="n">alt</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="n">genome</span><span class="o">=</span><span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg19</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">silva</span> <span class="o">=</span> <span class="n">symetrics</span><span class="o">.</span><span class="n">get_silva_scores</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -194,30 +210,38 @@ silva = symetrics.get_silva_scores(variant)</p>
 <span class="sig-name descname"><span class="pre">get_spliceai_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VariantObject</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/symetrics/symetrics_api.html#Symetrics.get_spliceai_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symetrics.Symetrics.get_spliceai_score" title="Permalink to this definition"></a></dt>
 <dd><p>Get the SpliceAI a given variant (reference: hg38)
 <a class="reference external" href="https://spliceailookup.broadinstitute.org/">https://spliceailookup.broadinstitute.org/</a></p>
-<p>Args:
-- variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
-<p>Returns:
-- spliceai_score: A dictionary returning the scores along with the variant information.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
+</dd>
+<dt>Returns:</dt><dd><p>spliceai_score: A dictionary returning the scores along with the variant information.</p>
+</dd>
+</dl>
 <p>Examples:</p>
-<p>from symetrics import *
-symetrics = Symetrics(‘symetrics.db’)
-variant = VariantObject(chr=’7’,pos=’91763673’,ref=’C’,alt=’A’,genome=GenomeReference.hg38)
-spliceai = symetrics.get_spliceai_score(variant)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">symetrics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">symetrics</span> <span class="o">=</span> <span class="n">Symetrics</span><span class="p">(</span><span class="s1">&#39;symetrics.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variant</span> <span class="o">=</span> <span class="n">VariantObject</span><span class="p">(</span><span class="nb">chr</span><span class="o">=</span><span class="s1">&#39;7&#39;</span><span class="p">,</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;91763673&#39;</span><span class="p">,</span><span class="n">ref</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="n">alt</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="n">genome</span><span class="o">=</span><span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg38</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spliceai</span> <span class="o">=</span> <span class="n">symetrics</span><span class="o">.</span><span class="n">get_spliceai_score</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="symetrics.Symetrics.get_surf_score">
 <span class="sig-name descname"><span class="pre">get_surf_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VariantObject</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/symetrics/symetrics_api.html#Symetrics.get_surf_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symetrics.Symetrics.get_surf_score" title="Permalink to this definition"></a></dt>
 <dd><p>Get the SURF a given variant (reference: hg38)</p>
-<p>Args:
-- variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
-<p>Returns:
-- surf_scores: A dictionary returning the scores along with the variant information.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
+</dd>
+<dt>Returns:</dt><dd><p>surf_scores: A dictionary returning the scores along with the variant information.</p>
+</dd>
+</dl>
 <p>Examples:</p>
-<p>from symetrics import *
-symetrics = Symetrics(‘symetrics.db’)
-variant = VariantObject(chr=’7’,pos=’91763673’,ref=’C’,alt=’A’,genome=GenomeReference.hg38)
-surf = symetrics.get_surf_score(variant)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">symetrics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">symetrics</span> <span class="o">=</span> <span class="n">Symetrics</span><span class="p">(</span><span class="s1">&#39;symetrics.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variant</span> <span class="o">=</span> <span class="n">VariantObject</span><span class="p">(</span><span class="nb">chr</span><span class="o">=</span><span class="s1">&#39;7&#39;</span><span class="p">,</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;91763673&#39;</span><span class="p">,</span><span class="n">ref</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="n">alt</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="n">genome</span><span class="o">=</span><span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg38</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">surf</span> <span class="o">=</span> <span class="n">symetrics</span><span class="o">.</span><span class="n">get_surf_score</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -225,17 +249,21 @@ surf = symetrics.get_surf_score(variant)</p>
 <span class="sig-name descname"><span class="pre">get_synvep_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VariantObject</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/symetrics/symetrics_api.html#Symetrics.get_synvep_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symetrics.Symetrics.get_synvep_score" title="Permalink to this definition"></a></dt>
 <dd><p>Get the SYNVEP a given variant (reference: hg38/hg19)
 <a class="reference external" href="https://services.bromberglab.org/synvep/home">https://services.bromberglab.org/synvep/home</a></p>
-<p>Args:
-- variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
-<p>Returns:
-- synvep_scores: A dictionary returning the scores along with the variant information.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
+</dd>
+<dt>Returns:</dt><dd><p>synvep_scores: A dictionary returning the scores along with the variant information.</p>
+</dd>
+</dl>
 <p>Examples:</p>
-<p>from symetrics import *
-symetrics = Symetrics(‘symetrics.db’)
-variant_hg19 = VariantObject(chr=’7’,pos=’91763673’,ref=’C’,alt=’A’,genome=GenomeReference.hg19)
-variant_hg38 = VariantObject(chr=’7’,pos=’91763673’,ref=’C’,alt=’A’,genome=GenomeReference.hg38)
-synvep_hg19 = symetrics.get_synvep_score(variant_hg19)
-synvep_hg38 = symetrics.get_synvep_score(variant_hg38)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">symetrics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">symetrics</span> <span class="o">=</span> <span class="n">Symetrics</span><span class="p">(</span><span class="s1">&#39;symetrics.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variant_hg19</span> <span class="o">=</span> <span class="n">VariantObject</span><span class="p">(</span><span class="nb">chr</span><span class="o">=</span><span class="s1">&#39;7&#39;</span><span class="p">,</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;91763673&#39;</span><span class="p">,</span><span class="n">ref</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="n">alt</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="n">genome</span><span class="o">=</span><span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg19</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variant_hg38</span> <span class="o">=</span> <span class="n">VariantObject</span><span class="p">(</span><span class="nb">chr</span><span class="o">=</span><span class="s1">&#39;7&#39;</span><span class="p">,</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;91763673&#39;</span><span class="p">,</span><span class="n">ref</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="n">alt</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="n">genome</span><span class="o">=</span><span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg38</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synvep_hg19</span> <span class="o">=</span> <span class="n">symetrics</span><span class="o">.</span><span class="n">get_synvep_score</span><span class="p">(</span><span class="n">variant_hg19</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synvep_hg38</span> <span class="o">=</span> <span class="n">symetrics</span><span class="o">.</span><span class="n">get_synvep_score</span><span class="p">(</span><span class="n">variant_hg38</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -243,15 +271,19 @@ synvep_hg38 = symetrics.get_synvep_score(variant_hg38)</p>
 <span class="sig-name descname"><span class="pre">liftover</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VariantObject</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/symetrics/symetrics_api.html#Symetrics.liftover"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symetrics.Symetrics.liftover" title="Permalink to this definition"></a></dt>
 <dd><p>Perform a conversion of the variant position based from their original reference to a target reference. If hg38 is given, it will
 be converted to hg19 and otherwise</p>
-<p>Args:
-- variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
-<p>Returns:
-- liftover_variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant after liftover</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant</p>
+</dd>
+<dt>Returns:</dt><dd><p>liftover_variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant after liftover</p>
+</dd>
+</dl>
 <p>Exampless:</p>
-<p>from symetrics import *
-symetrics = Symetrics(‘symetrics.db’)
-variant_hg19 = VariantObject(chr=’7’,pos=’91763673’,ref=’C’,alt=’A’,genome=GenomeReference.hg19)
-variant_hg38 = symetrics_db.liftover(variant_hg19)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">symetrics</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">symetrics</span> <span class="o">=</span> <span class="n">Symetrics</span><span class="p">(</span><span class="s1">&#39;symetrics.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variant_hg19</span> <span class="o">=</span> <span class="n">VariantObject</span><span class="p">(</span><span class="nb">chr</span><span class="o">=</span><span class="s1">&#39;7&#39;</span><span class="p">,</span><span class="n">pos</span><span class="o">=</span><span class="s1">&#39;91763673&#39;</span><span class="p">,</span><span class="n">ref</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="n">alt</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">,</span><span class="n">genome</span><span class="o">=</span><span class="n">GenomeReference</span><span class="o">.</span><span class="n">hg19</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">variant_hg38</span> <span class="o">=</span> <span class="n">symetrics_db</span><span class="o">.</span><span class="n">liftover</span><span class="p">(</span><span class="n">variant_hg19</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>

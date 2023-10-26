@@ -1,7 +1,8 @@
 Metadata-Version: 2.1
 Name: symetrics
-Version: 1.1.1
+Version: 2.0.0
 Summary: Symetrics API
+Home-page: https://lbundalian.github.io/symetrics/
 Author: Linnaeus Bundalian
 Author-email: linnaeusbundalian@gmail.com
 Keywords: python,synonymous variants
