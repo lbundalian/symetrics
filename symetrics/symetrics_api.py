@@ -92,17 +92,17 @@ class Symetrics(ISymetrics):
         Get the RSCU, dRSCU, GERP and CpG/CpG_Exon of a given variant (reference: hg19)
         
         Args:
-        - variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
+            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
         
         Returns:
-        - silva_scores: A dictionary returning the scores along with the variant information.
+            silva_scores: A dictionary returning the scores along with the variant information.
 
         Examples:
 
-        from symetrics import *
-        symetrics = Symetrics('symetrics.db')
-        variant = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
-        silva = symetrics.get_silva_scores(variant)
+            >>> from symetrics import *
+            >>> symetrics = Symetrics('symetrics.db')
+            >>> variant = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
+            >>> silva = symetrics.get_silva_scores(variant)
         
         """
 
@@ -141,17 +141,17 @@ class Symetrics(ISymetrics):
         Get the SURF a given variant (reference: hg38)
         
         Args:
-        - variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
+            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
         
         Returns:
-        - surf_scores: A dictionary returning the scores along with the variant information.
+            surf_scores: A dictionary returning the scores along with the variant information.
         
         Examples:
 
-        from symetrics import *
-        symetrics = Symetrics('symetrics.db')
-        variant = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
-        surf = symetrics.get_surf_score(variant)
+            >>> from symetrics import *
+            >>> symetrics = Symetrics('symetrics.db')
+            >>> variant = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
+            >>> surf = symetrics.get_surf_score(variant)
         
 
         """
@@ -185,19 +185,19 @@ class Symetrics(ISymetrics):
         https://services.bromberglab.org/synvep/home
         
         Args:
-        - variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
+            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
         
         Returns:
-        - synvep_scores: A dictionary returning the scores along with the variant information.
+            synvep_scores: A dictionary returning the scores along with the variant information.
         
         Examples:
 
-        from symetrics import *
-        symetrics = Symetrics('symetrics.db')
-        variant_hg19 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
-        variant_hg38 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
-        synvep_hg19 = symetrics.get_synvep_score(variant_hg19)
-        synvep_hg38 = symetrics.get_synvep_score(variant_hg38)
+            >>> from symetrics import *
+            >>> symetrics = Symetrics('symetrics.db')
+            >>> variant_hg19 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
+            >>> variant_hg38 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
+            >>> synvep_hg19 = symetrics.get_synvep_score(variant_hg19)
+            >>> synvep_hg38 = symetrics.get_synvep_score(variant_hg38)
 
         """
 
@@ -236,17 +236,17 @@ class Symetrics(ISymetrics):
         https://spliceailookup.broadinstitute.org/
         
         Args:
-        - variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
+            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
         
         Returns:
-        - spliceai_score: A dictionary returning the scores along with the variant information.
+            spliceai_score: A dictionary returning the scores along with the variant information.
         
         Examples:
 
-        from symetrics import *
-        symetrics = Symetrics('symetrics.db')
-        variant = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
-        spliceai = symetrics.get_spliceai_score(variant)
+            >>> from symetrics import *
+            >>> symetrics = Symetrics('symetrics.db')
+            >>> variant = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
+            >>> spliceai = symetrics.get_spliceai_score(variant)
 
         """
                         
@@ -289,16 +289,16 @@ class Symetrics(ISymetrics):
             - SURF: 0.3
         
         Args:
-        - gene: A string representing the HGNC Symbol of a gene
+            gene: A string representing the HGNC Symbol of a gene
         
         Returns:
-        - scores: A dictionary returning the pvalues and fdr acquired from the test and the score before and after scaling.
+            scores: A dictionary returning the pvalues and fdr acquired from the test and the score before and after scaling.
         
         Examples:
 
-        from symetrics import *
-        symetrics = Symetrics('symetrics.db')
-        score = symetrics.get_prop_score(group = 'SYNVEP',gene = 'A1BG')
+            >>> from symetrics import *
+            >>> symetrics = Symetrics('symetrics.db')
+            >>> score = symetrics.get_prop_score(group = 'SYNVEP',gene = 'A1BG')
         
         """
 
@@ -346,19 +346,19 @@ class Symetrics(ISymetrics):
         Get the gnomad information related to the alleles of the given variant (allele count, allele number and allele frequency)
         
         Args:
-        - variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
+            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
         
         Returns:
-        - gnomad_data: A dictionary containing the AC, AN, AF and variant information
+            gnomad_data: A dictionary containing the AC, AN, AF and variant information
         
         Examples:
 
-        from symetrics import *
-        symetrics = Symetrics('symetrics.db')
-        variant_hg19 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
-        variant_hg38 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
-        gnomad_hg19 = symetrics.get_gnomad_data(variant_hg19)
-        gnomad_hg38 = symetrics.get_gnomad_data(variant_hg38)
+            >>> from symetrics import *
+            >>> symetrics = Symetrics('symetrics.db')
+            >>> variant_hg19 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
+            >>> variant_hg38 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
+            >>> gnomad_hg19 = symetrics.get_gnomad_data(variant_hg19)
+            >>> gnomad_hg38 = symetrics.get_gnomad_data(variant_hg38)
 
         """
 
@@ -399,16 +399,16 @@ class Symetrics(ISymetrics):
         Get the constraints from gnomad (synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance) of a given gene
         
         Args:
-        - gene: A string representing the HGNC Symbol of a gene
+            gene: A string representing the HGNC Symbol of a gene
         
         Returns:
-        - gnomad_data: A dictionary of the synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance)
+            gnomad_data: A dictionary of the synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance)
         
         Examples:
 
-        from symetrics import *
-        symetrics = Symetrics('symetrics.db')
-        gnomad = symetrics.get_gnomad_constraints(gene = 'A1BG')
+            >>> from symetrics import *
+            >>> symetrics = Symetrics('symetrics.db')
+            >>> gnomad = symetrics.get_gnomad_constraints(gene = 'A1BG')
         
         """
 
@@ -427,17 +427,17 @@ class Symetrics(ISymetrics):
         be converted to hg19 and otherwise
 
         Args:
-        - variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
+            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
         
         Returns:
-        - liftover_variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant after liftover
+            liftover_variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant after liftover
         
         Exampless:
 
-        from symetrics import *
-        symetrics = Symetrics('symetrics.db')
-        variant_hg19 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
-        variant_hg38 = symetrics_db.liftover(variant_hg19)
+            >>> from symetrics import *
+            >>> symetrics = Symetrics('symetrics.db')
+            >>> variant_hg19 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
+            >>> variant_hg38 = symetrics_db.liftover(variant_hg19)
 
         """
 
