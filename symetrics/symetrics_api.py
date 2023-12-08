@@ -208,9 +208,9 @@ class Symetrics(ISymetrics):
             synvep_cursor = self._conn.cursor()
             synvep_query = ''
             if variant._genome == GenomeReference.hg38.name:
-                synvep_query = f'SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos_GRCh38 = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                synvep_query = f'SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP_V2 WHERE chr = {variant._chr} AND pos_GRCh38 = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
             elif variant._genome == GenomeReference.hg19.name:
-                synvep_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos_GRCh38 = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                synvep_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP_V2 WHERE chr = {variant._chr} AND pos_GRCh38 = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
             synvep_cursor.execute(synvep_query)
             synvep_rows = synvep_cursor.fetchall()
             synvep_scores = synvep_rows[0]
@@ -355,9 +355,7 @@ class Symetrics(ISymetrics):
 
             >>> from symetrics import *
             >>> symetrics = Symetrics('symetrics.db')
-            >>> variant_hg19 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
             >>> variant_hg38 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
-            >>> gnomad_hg19 = symetrics.get_gnomad_data(variant_hg19)
             >>> gnomad_hg38 = symetrics.get_gnomad_data(variant_hg38)
 
         """
@@ -367,7 +365,8 @@ class Symetrics(ISymetrics):
         gnomad_data = None
 
         if variant._genome == GenomeReference.hg19.name:
-            gnomad_conn = self.connect_to_database('data/gnomad2/gnomad_db.sqlite3')
+            #gnomad_conn = self.connect_to_database('data/gnomad2/gnomad_db.sqlite3')
+            print("Not possible in the current version please use the hg38 version of the variant")
         elif variant._genome == GenomeReference.hg38.name:
             gnomad_conn = self.connect_to_database('data/gnomad3/gnomad_db.sqlite3')
 
@@ -451,10 +450,10 @@ class Symetrics(ISymetrics):
             synvep_query = ''
             if variant._genome == GenomeReference.hg38:
                 new_reference = GenomeReference.hg19
-                synvep_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos_GRCh38 = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                synvep_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP_V2 WHERE chr = {variant._chr} AND pos_GRCh38 = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
             elif variant._genome == GenomeReference.hg19:
                 new_reference = GenomeReference.hg38
-                synvep_query = f'SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                synvep_query = f'SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP_V2 WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
             synvep_cursor.execute(synvep_query)
             synvep_rows = synvep_cursor.fetchall()
             variant_info = synvep_rows[0]
