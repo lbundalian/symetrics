@@ -368,7 +368,7 @@ class Symetrics(ISymetrics):
             #gnomad_conn = self.connect_to_database('data/gnomad2/gnomad_db.sqlite3')
             print("Not possible in the current version please use the hg38 version of the variant")
         elif variant._genome == GenomeReference.hg38.name:
-            gnomad_conn = self.connect_to_database('data/gnomad3/gnomad_db.sqlite3')
+            gnomad_conn = self.connect_to_database('data/gnomad-lite.db')
 
         try:
             gnomad_cursor = gnomad_conn.cursor()
