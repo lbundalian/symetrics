@@ -91,21 +91,25 @@ class Symetrics(ISymetrics):
             # dont forget silva is hg19
             with self._db as dbhandler:
                 silva_cursor = dbhandler._conn.cursor()
-                silva_query = f'SELECT "#chrom" AS CHR,pos AS POS,ref AS REF,alt AS ALT,gene AS GENE,"#RSCU" AS RSCU,dRSCU,"#GERP++" AS GERP,"#CpG?" AS CPG,CpG_exon AS CPGX FROM SILVA WHERE "#chrom" = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                #silva_query = f'SELECT "#chrom" AS CHR,pos AS POS,ref AS REF,alt AS ALT,gene AS GENE,"#RSCU" AS RSCU,dRSCU,"#GERP++" AS GERP,"#CpG?" AS CPG,CpG_exon AS CPGX FROM SILVA WHERE "#chrom" = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                #silva_query = f'SELECT * FROM SILVA WHERE "#chrom" = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                silva_query = f'SELECT * FROM SILVA_SCORE WHERE CHROM = {variant._chr} AND POS = {variant._pos} AND REF = "{variant._ref}" AND ALT = "{variant._alt}"'
+                
                 silva_cursor.execute(silva_query)
                 silva_rows = silva_cursor.fetchall()
                 silva_scores = silva_rows[0]
                 silva_scores = {
                     "CHR": silva_scores[0],
                     "POS": silva_scores[1],
-                    "REF": silva_scores[2],
-                    "ALT": silva_scores[3],
-                    "GENE": silva_scores[4],
-                    "RSCU": silva_scores[5],
-                    "dRSCU": silva_scores[6],
+                    "REF": silva_scores[3],
+                    "ALT": silva_scores[4],
+                    "GENE": silva_scores[5],
+                    "RSCU": silva_scores[8],
+                    "dRSCU": silva_scores[9],
                     "GERP": silva_scores[7],
-                    "CPG": silva_scores[8],
-                    "CPGX": silva_scores[9]
+                    "MES": silva_scores[12],
+                    "CPG": silva_scores[10],
+                    "CPGX": silva_scores[11]
                 }
 
         except Error as e:
@@ -151,7 +155,7 @@ class Symetrics(ISymetrics):
                     "POS": surf_scores[1],
                     "REF": surf_scores[2],
                     "ALT": surf_scores[3],
-                    "SURF": surf_scores[4]
+                    "SURF": surf_scores[5]
 
                 }
         except Error as e:
@@ -237,7 +241,7 @@ class Symetrics(ISymetrics):
         try:
             # synvep is hg38 (pos_GRCh38) abd hg19 (pos)
             with self._db as dbhandler:
-                spliceai_cursor = self._conn.cursor()
+                spliceai_cursor = dbhandler._conn.cursor()
                 spliceai_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, INFO FROM SPLICEAI WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
                 spliceai_cursor.execute(spliceai_query)
                 spliceai_rows = spliceai_cursor.fetchall()
@@ -445,6 +449,7 @@ class Symetrics(ISymetrics):
                 elif variant._genome == GenomeReference.hg19:
                     new_reference = GenomeReference.hg38
                     synvep_query = f'SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                    print(synvep_query)
                 synvep_cursor.execute(synvep_query)
                 synvep_rows = synvep_cursor.fetchall()
                 variant_info = synvep_rows[0]
@@ -460,5 +465,44 @@ class Symetrics(ISymetrics):
             logging.error(f"Connection to {self._db} failed")
     
         return liftover_variant
+    
+
+    def get_variant_list(self,gene: str):
+
+        """
+        
+        Get a list of variants associated with the gene
+
+        Args:
+            gene: A string type input referring to the gene of interest
+        
+        Returns:
+            variant_list: A list of all variants under the gene
+                
+        Exampless:
+
+            >>> from symetrics import *
+            >>> symetrics = Symetrics('symetrics.db')
+            >>> variant_list = symetrics.get_variant_list('A1BG')
+
+        """
+
+
+        variant_list = None
+
+        try:
+            # synvep is hg38 (pos_GRCh38) abd hg19 (pos)
+            with self._db as dbhandler:
+                synvep_cursor = dbhandler._conn.cursor()
+                synvep_query = ''
+                synvep_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE HGNC_gene_symbol = "{gene}"'                    
+                synvep_cursor.execute(synvep_query)
+                synvep_rows = synvep_cursor.fetchall()
+                variant_list = synvep_rows
+            
+        except Error as e:
+            logging.error(f"Connection to {self._db} failed")
+    
+        return variant_list
         
 

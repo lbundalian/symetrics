@@ -12,6 +12,7 @@ class MetricsGroup(Enum):
     DRSCU = auto()
     GERP = auto()
     SYNVEP = auto()
+    SPLICEAI = auto()
 
 class GenomeReference(Enum):
 
