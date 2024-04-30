@@ -24,5 +24,8 @@ print(n)
 n = api.get_prop_score(group='SYNVEP',gene='DNMT1')
 print(n)
 
-n = api.get_prop_score(group='SURF',gene='DNMT1')
+n = api.get_gnomad_constraints(gene='DNMT1')
+print(n)
+
+n = api.get_variant_list(gene = 'DNMT1')
 print(n)

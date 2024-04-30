@@ -395,8 +395,20 @@ class Symetrics(ISymetrics):
             try:
                 with self._gnomad_db as dbhandler:
                     gnomad_cursor = dbhandler._conn.cursor()
-                    gnomad_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, AC, AN, AF FROM gnomad_db WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
-                    gnomad_cursor.execute(gnomad_query)
+                    
+                    #gnomad_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, AC, AN, AF FROM gnomad_db WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                    
+                    
+                    gnomad_query = """
+                        SELECT chr as CHR, pos as POS, ref as REF, alt as ALT, AC, AN, AF
+                        FROM gnomad_db
+                        WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
+                        """
+                    
+                    params = (variant._chr, variant._pos, variant._ref, variant._alt)
+                    
+                    gnomad_cursor.execute(gnomad_query, params)
+
                     gnomad_rows = gnomad_cursor.fetchall()
                     if len(gnomad_rows) > 0:
                         gnomad_data = gnomad_rows[0]
@@ -438,11 +450,34 @@ class Symetrics(ISymetrics):
         """
 
         gnomad_data =  None
-        gnomad_constraints = self._collection['collection']['gnomad']['constraints']
-        gnomad_data = pd.read_csv(gnomad_constraints,sep="\t")
-        gnomad_data = gnomad_data[['gene','transcript','syn_z','mis_z','lof_z','pLI']]
-        gnomad_data =  gnomad_data[gnomad_data.gene == gene]
-        gnomad_data = gnomad_data.to_dict(orient='records')
+
+        try:
+            with self._constraints as dbhandler:
+                            
+                cursor = dbhandler._conn.cursor()
+                            
+                query = f"SELECT * FROM GNOMADv4Constraints WHERE gene = ?"
+                            
+                params = (gene,)
+
+                cursor.execute(query,params)
+                rows = cursor.fetchall()
+                gnomad_data = rows[0]
+                gnomad_data = {
+                                "gene": gnomad_data[0],
+                                "transcript": gnomad_data[1],
+                                "syn_z": gnomad_data[2],
+                                "mis_z": gnomad_data[3],
+                                "lof_z": gnomad_data[4],
+                                "pLI": gnomad_data[5]
+                }
+
+        except Error as e:
+                    logging.error(e)
+                    logging.error(f"Connection to {self._constraints} failed")
+
+
+    
         return gnomad_data
 
     def liftover(self,variant: VariantObject):
@@ -477,12 +512,23 @@ class Symetrics(ISymetrics):
                 synvep_query = ''
                 if variant._genome == GenomeReference.hg38:
                     new_reference = GenomeReference.hg19
-                    synvep_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos_GRCh38 = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
+                    synvep_query = """
+                        SELECT chr as CHR, pos as POS, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
+                        FROM SYNVEP
+                        WHERE chr = ? AND pos_GRCh38 = ? AND ref = ? AND alt = ?
+                        """    
+
                 elif variant._genome == GenomeReference.hg19:
                     new_reference = GenomeReference.hg38
                     synvep_query = f'SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
-                    print(synvep_query)
-                synvep_cursor.execute(synvep_query)
+                    synvep_query = """
+                        SELECT chr as CHR, pos_GRCh38 as POS, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
+                        FROM SYNVEP
+                        WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
+                        """    
+                params = (variant._chr, variant._pos, variant._ref, variant._alt)
+                
+                synvep_cursor.execute(synvep_query,params)
                 synvep_rows = synvep_cursor.fetchall()
                 variant_info = synvep_rows[0]
                 liftover_variant = VariantObject(
@@ -528,7 +574,13 @@ class Symetrics(ISymetrics):
                 synvep_cursor = dbhandler._conn.cursor()
                 synvep_query = ''
                 synvep_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE HGNC_gene_symbol = "{gene}"'                    
-                synvep_cursor.execute(synvep_query)
+                
+                query = "SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE HGNC_gene_symbol = ?"
+                            
+                params = (gene,)
+                
+                
+                synvep_cursor.execute(query,params)
                 synvep_rows = synvep_cursor.fetchall()
                 variant_list = synvep_rows
             
