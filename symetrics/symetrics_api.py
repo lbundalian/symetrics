@@ -53,6 +53,7 @@ class Symetrics(ISymetrics):
     _conn = None
     _collection = None
     _gnomad_db = None
+    _constraints = None
     _collection = None
     
     def __init__(self, cfg) -> None:
@@ -60,8 +61,9 @@ class Symetrics(ISymetrics):
         with open(cfg, 'r') as file:
             config = json.load(file)
     
-        self._db = DbContext(config['collection']['symetrics']['database'])
-        self._gnomad_db = DbContext(config['collection']['gnomad']['database'])
+        self._db = DbContext(config['collection']['symetrics'])
+        self._gnomad_db = DbContext(config['collection']['gnomad'])
+        self._constraints = DbContext(config['collection']['constraints'])
         self._collection = config
 
     
@@ -160,7 +162,7 @@ class Symetrics(ISymetrics):
                 
                 params = (variant._chr, variant._pos, variant._ref, variant._alt)
 
-                surf_cursor.execute(surf_query)
+                surf_cursor.execute(surf_query,params)
                 surf_rows = surf_cursor.fetchall()
                 surf_scores = surf_rows[0]
                 surf_scores = {
@@ -324,38 +326,35 @@ class Symetrics(ISymetrics):
 
         scores = None
         scaler = StandardScaler()
-        synvep_constraints = self._collection['collection']['symetrics']['constraints']
-
+        
 
         if group in MetricsGroup.__members__:
-            match group:
-                case MetricsGroup.SYNVEP.name:
-                    scores = pd.read_csv(synvep_constraints[group])
-                    scaled_scores = scaler.fit_transform(scores[['z']])
-                    scores['scaled_z'] = scaled_scores
-                    scores = scores[scores.GENES ==  gene]
-                    scores = scores[['GENES','pval','fdr','z','scaled_z']]
-                    scores.columns = ['GENE','PVAL','FDR','SYMETRIC_SCORE','NORM_SYMETRIC_SCORE']
-                    scores['GROUP'] = group
-                    scores = scores.to_dict(orient='records')
-                case MetricsGroup.SURF.name:
-                    scores = pd.read_csv(synvep_constraints[group])
-                    scaled_scores = scaler.fit_transform(scores[['z']])
-                    scores['scaled_z'] = scaled_scores
-                    scores = scores[scores.GENES ==  gene]
-                    scores = scores[['GENES','pval','fdr','z','scaled_z']]
-                    scores.columns = ['GENE','PVAL','FDR','SYMETRIC_SCORE','NORM_SYMETRIC_SCORE']
-                    scores['GROUP'] = group
-                    scores = scores.to_dict(orient='records')
-                case _:
-                    scores = pd.read_csv(synvep_constraints[group])
-                    scaled_scores = scaler.fit_transform(scores[['z']])
-                    scores['scaled_z'] = scaled_scores
-                    scores = scores[scores.GENE ==  gene]
-                    scores = scores[['GENE','pval','fdr','z','scaled_z']]
-                    scores.columns = ['GENE','PVAL','FDR','SYMETRIC_SCORE','NORM_SYMETRIC_SCORE']
-                    scores['GROUP'] = group
-                    scores = scores.to_dict(orient='records')
+            scores = None
+            try:
+                with self._constraints as dbhandler:
+                            
+                    cursor = dbhandler._conn.cursor()
+                            
+                    query = f"SELECT GENES as GENE, pval as PVAL, fdr as FDR, z as SYMETRIC_SCORE, norm_z as NORM_SYMETRIC_SCORE FROM GNOMADv4{group} WHERE GENES = ?"
+                            
+                    params = (gene,)
+
+                    cursor.execute(query,params)
+                    rows = cursor.fetchall()
+                    scores = rows[0]
+                    scores = {
+                                "GENE": scores[0],
+                                "PVAL": scores[1],
+                                "FDR": scores[2],
+                                "SYMERIC_SCORE": scores[3],
+                                "NORM_SYMERIC_SCORE": scores[4]
+                    }
+
+            except Error as e:
+                    logging.error(e)
+                    logging.error(f"Connection to {self._constraints} failed")
+                
+                    
         else:
             logging.error(f'Group: {group} is not valid')       
     

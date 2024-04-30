@@ -1,23 +1,11 @@
 {
-    "collection": {
-      "symetrics": {
-        "database": "C:/Users/rosen/Downloads/symetrics_project/data/symetrics.sqlite3",
-        "constraints": {
-            "SYNVEP":"C:/Users/rosen/Downloads/symetrics_project/data/GNOMADv4_SYNVEP_DATA.csv",
-            "CPG_EXON":"C:/Users/rosen/Downloads/symetrics_project/data/GNOMADv4_CPGX_DATA.csv",
-            "CPG":"C:/Users/rosen/Downloads/symetrics_project/data/GNOMADv4_CPG_DATA.csv",
-            "dRSCU":"C:/Users/rosen/Downloads/symetrics_project/data/GNOMADv4_DRSCU_DATA.csv",
-            "RSCU":"C:/Users/rosen/Downloads/symetrics_project/data/GNOMADv4_RSCU_DATA.csv",
-            "MRNA":"C:/Users/rosen/Downloads/symetrics_project/data/GNOMADv4_MRNA_DATA.csv",
-            "PREMRNA":"C:/Users/rosen/Downloads/symetrics_project/data/GNOMADv4_PREMRNA_DATA.csv",
-            "SPLICEAI":"C:/Users/rosen/Downloads/symetrics_project/data/GNOMADv4_SPLICEAI_DATA.csv",
-            "SURF":"C:/Users/rosen/Downloads/symetrics_project/data/GNOMADv4_SURF_DATA.csv"    
-        }
-      },
-      "gnomad": {
-        "database": "C:/Users/rosen/Downloads/symetrics_project/data/gnomad-lite.db",
-        "constraints": "C:/Users/rosen/Downloads/symetrics_project/data/gnomad.v4.0.constraint_metrics.tsv"
-      }
-    }
+  "collection": {
+  
+    "symetrics": "C:/Users/rosen/Downloads/symetrics_project/data/symetrics.sqlite3",
+    "gnomad":  "C:/Users/rosen/Downloads/symetrics_project/data/gnomad-lite.sqlite3",
+    "constraints": "C:/Users/rosen/Downloads/symetrics_project/data/genewise/genewise.sqlite3"
+    
   }
+}
+  
   

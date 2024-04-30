@@ -53,6 +53,7 @@ class Symetrics(ISymetrics):
     _conn = None
     _collection = None
     _gnomad_db = None
+    _constraints = None
     _collection = None
     
     def __init__(self, cfg) -> None:
@@ -60,8 +61,9 @@ class Symetrics(ISymetrics):
         with open(cfg, 'r') as file:
             config = json.load(file)
     
-        self._db = DbContext(config['collection']['symetrics']['database'])
-        self._gnomad_db = DbContext(config['collection']['gnomad']['database'])
+        self._db = DbContext(config['collection']['symetrics'])
+        self._gnomad_db = DbContext(config['collection']['gnomad'])
+        self._constraints = DbContext(config['collection']['constraints'])
         self._collection = config
 
     
@@ -90,12 +92,16 @@ class Symetrics(ISymetrics):
         try:
             # dont forget silva is hg19
             with self._db as dbhandler:
-                silva_cursor = dbhandler._conn.cursor()
-                #silva_query = f'SELECT "#chrom" AS CHR,pos AS POS,ref AS REF,alt AS ALT,gene AS GENE,"#RSCU" AS RSCU,dRSCU,"#GERP++" AS GERP,"#CpG?" AS CPG,CpG_exon AS CPGX FROM SILVA WHERE "#chrom" = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
-                #silva_query = f'SELECT * FROM SILVA WHERE "#chrom" = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
-                silva_query = f'SELECT * FROM SILVA_SCORE WHERE CHROM = {variant._chr} AND POS = {variant._pos} AND REF = "{variant._ref}" AND ALT = "{variant._alt}"'
                 
-                silva_cursor.execute(silva_query)
+                silva_cursor = dbhandler._conn.cursor()
+                
+                silva_query = """
+                        SELECT * FROM SILVA_SCORE 
+                        WHERE CHROM = ? AND POS = ? AND REF = ? AND ALT = ?
+                        """
+                params = (variant._chr, variant._pos, variant._ref, variant._alt)
+
+                silva_cursor.execute(silva_query,params)
                 silva_rows = silva_cursor.fetchall()
                 silva_scores = silva_rows[0]
                 silva_scores = {
@@ -145,9 +151,18 @@ class Symetrics(ISymetrics):
         try:
             # SURF is hg38
             with self._db as dbhandler:
+                
                 surf_cursor = dbhandler._conn.cursor()
-                surf_query = f'SELECT CHR,POS,REF,ALT,GENE,SURF FROM SURF WHERE CHR = {variant._chr} AND POS = {variant._pos} AND REF = "{variant._ref}" AND ALT = "{variant._alt}"'
-                surf_cursor.execute(surf_query)
+                
+                surf_query = """
+                    SELECT CHR, POS, REF, ALT, GENE, SURF
+                    FROM SURF
+                    WHERE CHR = ? AND POS = ? AND REF = ? AND ALT = ?
+                    """
+                
+                params = (variant._chr, variant._pos, variant._ref, variant._alt)
+
+                surf_cursor.execute(surf_query,params)
                 surf_rows = surf_cursor.fetchall()
                 surf_scores = surf_rows[0]
                 surf_scores = {
@@ -195,10 +210,21 @@ class Symetrics(ISymetrics):
                 synvep_cursor = dbhandler._conn.cursor()
                 synvep_query = ''
                 if variant._genome.name == GenomeReference.hg38.name:
-                    synvep_query = f'SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos_GRCh38 = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
-                elif variant._genome.name == GenomeReference.hg19.name:
-                    synvep_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos_GRCh38 = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
-                synvep_cursor.execute(synvep_query)
+                    synvep_query = """
+                        SELECT chr as CHR, pos_GRCh38 as POS, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
+                        FROM SYNVEP
+                        WHERE chr = ? AND pos_GRCh38 = ? AND ref = ? AND alt = ?
+                        """    
+                    
+                elif variant._genome.name == GenomeReference.hg19.name:                    
+                    synvep_query = """
+                        SELECT chr as CHR, pos_GRCh38 as POS, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
+                        FROM SYNVEP
+                        WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
+                        """
+                params = (variant._chr, variant._pos, variant._ref, variant._alt)
+                
+                synvep_cursor.execute(synvep_query,params)
                 synvep_rows = synvep_cursor.fetchall()
                 synvep_scores = synvep_rows[0]
                 synvep_scores = {
@@ -242,8 +268,17 @@ class Symetrics(ISymetrics):
             # synvep is hg38 (pos_GRCh38) abd hg19 (pos)
             with self._db as dbhandler:
                 spliceai_cursor = dbhandler._conn.cursor()
-                spliceai_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, INFO FROM SPLICEAI WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
-                spliceai_cursor.execute(spliceai_query)
+                                
+                spliceai_query = """
+                SELECT chr as CHR, pos as POS, ref as REF, alt as ALT, INFO
+                FROM SPLICEAI
+                WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
+                """
+
+                # Prepare the parameters tuple
+                params = (variant._chr, variant._pos, variant._ref, variant._alt)
+
+                spliceai_cursor.execute(spliceai_query,params)
                 spliceai_rows = spliceai_cursor.fetchall()
                 spliceai_score = pd.DataFrame(spliceai_rows)
                 spliceai_score.columns = ['CHR','POS','REF','ALT','INFO']
@@ -291,38 +326,35 @@ class Symetrics(ISymetrics):
 
         scores = None
         scaler = StandardScaler()
-        synvep_constraints = self._collection['collection']['symetrics']['constraints']
-
+        
 
         if group in MetricsGroup.__members__:
-            match group:
-                case MetricsGroup.SYNVEP.name:
-                    scores = pd.read_csv(synvep_constraints[group])
-                    scaled_scores = scaler.fit_transform(scores[['z']])
-                    scores['scaled_z'] = scaled_scores
-                    scores = scores[scores.GENES ==  gene]
-                    scores = scores[['GENES','pval','fdr','z','scaled_z']]
-                    scores.columns = ['GENE','PVAL','FDR','SYMETRIC_SCORE','NORM_SYMETRIC_SCORE']
-                    scores['GROUP'] = group
-                    scores = scores.to_dict(orient='records')
-                case MetricsGroup.SURF.name:
-                    scores = pd.read_csv(synvep_constraints[group])
-                    scaled_scores = scaler.fit_transform(scores[['z']])
-                    scores['scaled_z'] = scaled_scores
-                    scores = scores[scores.GENES ==  gene]
-                    scores = scores[['GENES','pval','fdr','z','scaled_z']]
-                    scores.columns = ['GENE','PVAL','FDR','SYMETRIC_SCORE','NORM_SYMETRIC_SCORE']
-                    scores['GROUP'] = group
-                    scores = scores.to_dict(orient='records')
-                case _:
-                    scores = pd.read_csv(synvep_constraints[group])
-                    scaled_scores = scaler.fit_transform(scores[['z']])
-                    scores['scaled_z'] = scaled_scores
-                    scores = scores[scores.GENE ==  gene]
-                    scores = scores[['GENE','pval','fdr','z','scaled_z']]
-                    scores.columns = ['GENE','PVAL','FDR','SYMETRIC_SCORE','NORM_SYMETRIC_SCORE']
-                    scores['GROUP'] = group
-                    scores = scores.to_dict(orient='records')
+            scores = None
+            try:
+                with self._constraints as dbhandler:
+                            
+                    cursor = dbhandler._conn.cursor()
+                            
+                    query = f"SELECT GENES as GENE, pval as PVAL, fdr as FDR, z as SYMETRIC_SCORE, norm_z as NORM_SYMETRIC_SCORE FROM GNOMADv4{group} WHERE GENES = ?"
+                            
+                    params = (gene,)
+
+                    cursor.execute(query,params)
+                    rows = cursor.fetchall()
+                    scores = rows[0]
+                    scores = {
+                                "GENE": scores[0],
+                                "PVAL": scores[1],
+                                "FDR": scores[2],
+                                "SYMERIC_SCORE": scores[3],
+                                "NORM_SYMERIC_SCORE": scores[4]
+                    }
+
+            except Error as e:
+                    logging.error(e)
+                    logging.error(f"Connection to {self._constraints} failed")
+                
+                    
         else:
             logging.error(f'Group: {group} is not valid')       
     
