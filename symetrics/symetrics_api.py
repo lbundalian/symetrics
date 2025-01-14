@@ -4,15 +4,15 @@ import sqlite3
 from sqlite3 import Error
 import abc
 import logging
-from enum import Enum,auto
+from enum import Enum, auto
 import json
 from sklearn.preprocessing import StandardScaler
 from .src.datastruct import *
 from .dbcontext import DbContext
+from .modelcontext import ModelContext
 
 
 class ISymetrics(abc.ABC):
-
 
     @abc.abstractclassmethod
     def get_silva_score():
@@ -42,10 +42,10 @@ class ISymetrics(abc.ABC):
     def get_gnomad_constraints():
         pass
 
-
     @abc.abstractclassmethod
     def liftover():
         pass
+
 
 class Symetrics(ISymetrics):
 
@@ -54,539 +54,283 @@ class Symetrics(ISymetrics):
     _collection = None
     _gnomad_db = None
     _constraints = None
-    _collection = None
-    
-    def __init__(self, cfg) -> None:
+    _features = ['Synvep', 'SPLICEAI', 'SURF', 'MES', 'GERP', 'CpG', 'CpG_exon', 'RSCU', 'dRSCU', 'F_MRNA', 'F_PREMRNA', 'AF']
 
+    def __init__(self, cfg) -> None:
         with open(cfg, 'r') as file:
             config = json.load(file)
-    
+
         self._db = DbContext(config['collection']['symetrics'])
         self._gnomad_db = DbContext(config['collection']['gnomad'])
         self._constraints = DbContext(config['collection']['constraints'])
+        self._model = ModelContext(config['collection']['model'], self._features)
         self._collection = config
 
-    
-    def get_silva_score(self,variant: VariantObject):
-
+    def execute_query(self, query: str, params: tuple, default_result: dict, columns: list, db: DbContext):
         """
-        
-        Get the RSCU, dRSCU, GERP and CpG/CpG_Exon of a given variant (reference: hg19)
-        
-        Args:
-            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
-        
-        Returns:
-            silva_scores: A dictionary returning the scores along with the variant information.
-
-        Examples:
-
-            >>> from symetrics import *
-            >>> symetrics = Symetrics('symetrics.db')
-            >>> variant = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
-            >>> silva = symetrics.get_silva_score(variant)
-        
+        Executes an SQL query and returns the result as a dictionary.
+        If no rows are returned, returns default_result.
         """
-
-        silva_scores = None
         try:
-            # dont forget silva is hg19
-            with self._db as dbhandler:
-                
-                silva_cursor = dbhandler._conn.cursor()
-                
-                silva_query = """
-                        SELECT * FROM SILVA_SCORE 
-                        WHERE CHROM = ? AND POS = ? AND REF = ? AND ALT = ?
-                        """
-                params = (variant._chr, variant._pos, variant._ref, variant._alt)
-
-                silva_cursor.execute(silva_query,params)
-                silva_rows = silva_cursor.fetchall()
-                silva_scores = silva_rows[0]
-                silva_scores = {
-                    "CHR": silva_scores[0],
-                    "POS": silva_scores[1],
-                    "REF": silva_scores[3],
-                    "ALT": silva_scores[4],
-                    "GENE": silva_scores[5],
-                    "RSCU": silva_scores[8],
-                    "dRSCU": silva_scores[9],
-                    "GERP": silva_scores[7],
-                    "MES": silva_scores[12],
-                    "CPG": silva_scores[10],
-                    "CPGX": silva_scores[11]
-                }
-
+            with db as dbhandler:
+                cursor = dbhandler._conn.cursor()
+                cursor.execute(query, params)
+                row = cursor.fetchone()
+                if row:
+                    return dict(zip(columns, row))
         except Error as e:
-            logging.error(f"Connection to {self._db} failed")
-        
+            logging.error(f"Database error: {e}")
+        return default_result
 
-
-        return silva_scores
-
-    def get_surf_score(self,variant: VariantObject):
-        
+    def get_silva_score(self, variant: VariantObject):
+        default_values = {
+            "CHR": variant._chr,
+            "POS": variant._pos,
+            "REF": variant._ref,
+            "ALT": variant._alt,
+            "GENE": "N/A",
+            "RSCU": 0.0,
+            "dRSCU": 0.0,
+            "GERP": 0.0,
+            "MES": 0.0,
+            "CPG": 0.0,
+            "CPGX": 0.0,
+            "F_PREMRNA": 0.0,
+            "F_MRNA": 0.0
+        }
+        query = """
+            SELECT CHROM, POS, REF, ALT, GENE, GERP, RSCU, dRSCU, CpG, CpG_exon, MES, F_PREMRNA, F_MRNA
+            FROM SILVA_SCORE
+            WHERE CHROM = ? AND POS = ? AND REF = ? AND ALT = ?
         """
-        
-        Get the SURF a given variant (reference: hg38)
-        
-        Args:
-            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
-        
-        Returns:
-            surf_scores: A dictionary returning the scores along with the variant information.
-        
-        Examples:
+        columns = ["CHR", "POS", "REF", "ALT", "GENE", "GERP", "RSCU", "dRSCU", "CPG", "CPGX", "MES", "F_PREMRNA", "F_MRNA"]
+        return self.execute_query(query, (variant._chr, variant._pos, variant._ref, variant._alt), default_values, columns,self._db)
 
-            >>> from symetrics import *
-            >>> symetrics = Symetrics('symetrics.db')
-            >>> variant = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
-            >>> surf = symetrics.get_surf_score(variant)
-        
-
+    def get_surf_score(self, variant: VariantObject):
+        default_values = {
+            "CHR": variant._chr,
+            "POS": variant._pos,
+            "REF": variant._ref,
+            "ALT": variant._alt,
+            "SURF": 0.0
+        }
+        query = """
+            SELECT CHR, POS, REF, ALT, SURF
+            FROM SURF
+            WHERE CHR = ? AND POS = ? AND REF = ? AND ALT = ?
         """
+        columns = ["CHR", "POS", "REF", "ALT", "SURF"]
+        return self.execute_query(query, (variant._chr, variant._pos, variant._ref, variant._alt), default_values, columns,self._db)
 
-        surf_scores = None
-        try:
-            # SURF is hg38
-            with self._db as dbhandler:
-                
-                surf_cursor = dbhandler._conn.cursor()
-                
-                surf_query = """
-                    SELECT CHR, POS, REF, ALT, GENE, SURF
-                    FROM SURF
-                    WHERE CHR = ? AND POS = ? AND REF = ? AND ALT = ?
-                    """
-                
-                params = (variant._chr, variant._pos, variant._ref, variant._alt)
-
-                surf_cursor.execute(surf_query,params)
-                surf_rows = surf_cursor.fetchall()
-                surf_scores = surf_rows[0]
-                surf_scores = {
-                    "CHR": surf_scores[0],
-                    "POS": surf_scores[1],
-                    "REF": surf_scores[2],
-                    "ALT": surf_scores[3],
-                    "SURF": surf_scores[5]
-
-                }
-        except Error as e:
-            logging.error(f"Connection to {self._db} failed")
-    
-        return surf_scores
-    
-    def get_synvep_score(self,variant: VariantObject):
-
+    def get_synvep_score(self, variant: VariantObject):
+        default_values = {
+            "CHR": variant._chr,
+            "POS": variant._pos,
+            "REF": variant._ref,
+            "ALT": variant._alt,
+            "GENE": "N/A",
+            "SYNVEP": 0.0
+        }
+        query = """
+            SELECT chr as CHR, pos_GRCh38 as POS, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
+            FROM SYNVEP
+            WHERE chr = ? AND pos_GRCh38 = ? AND ref = ? AND alt = ?
         """
-        
-        Get the SYNVEP a given variant (reference: hg38/hg19)
-        https://services.bromberglab.org/synvep/home
-        
-        Args:
-            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
-        
-        Returns:
-            synvep_scores: A dictionary returning the scores along with the variant information.
-        
-        Examples:
-
-            >>> from symetrics import *
-            >>> symetrics = Symetrics('symetrics.db')
-            >>> variant_hg19 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
-            >>> variant_hg38 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
-            >>> synvep_hg19 = symetrics.get_synvep_score(variant_hg19)
-            >>> synvep_hg38 = symetrics.get_synvep_score(variant_hg38)
-
-        """
-
-        synvep_scores = None
-
-        try:
-            # synvep is hg38 (pos_GRCh38) abd hg19 (pos)
-            with self._db as dbhandler:
-                synvep_cursor = dbhandler._conn.cursor()
-                synvep_query = ''
-                if variant._genome.name == GenomeReference.hg38.name:
-                    synvep_query = """
-                        SELECT chr as CHR, pos_GRCh38 as POS, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
-                        FROM SYNVEP
-                        WHERE chr = ? AND pos_GRCh38 = ? AND ref = ? AND alt = ?
-                        """    
-                    
-                elif variant._genome.name == GenomeReference.hg19.name:                    
-                    synvep_query = """
-                        SELECT chr as CHR, pos_GRCh38 as POS, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
-                        FROM SYNVEP
-                        WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
-                        """
-                params = (variant._chr, variant._pos, variant._ref, variant._alt)
-                
-                synvep_cursor.execute(synvep_query,params)
-                synvep_rows = synvep_cursor.fetchall()
-                synvep_scores = synvep_rows[0]
-                synvep_scores = {
-                    "CHR": synvep_scores[0],
-                    "POS": synvep_scores[1],
-                    "REF": synvep_scores[2],
-                    "ALT": synvep_scores[3],
-                    "GENE": synvep_scores[4],
-                    "SYNVEP": synvep_scores[5]
-
-                }
-        except Error as e:
-            logging.error(f"Connection to {self._db} failed")
-    
-        return synvep_scores
+        columns = ["CHR", "POS", "REF", "ALT", "GENE", "SYNVEP"]
+        return self.execute_query(query, (variant._chr, variant._pos, variant._ref, variant._alt), default_values, columns,self._db)
 
     def get_spliceai_score(self, variant: VariantObject):
-
-        """
-        
-        Get the SpliceAI a given variant (reference: hg38)
-        https://spliceailookup.broadinstitute.org/
-        
-        Args:
-            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
-        
-        Returns:
-            spliceai_score: A dictionary returning the scores along with the variant information.
-        
-        Examples:
-
-            >>> from symetrics import *
-            >>> symetrics = Symetrics('symetrics.db')
-            >>> variant = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
-            >>> spliceai = symetrics.get_spliceai_score(variant)
-
-        """
-                        
-        spliceai_score = None
+        default_values = {
+            "CHR": variant._chr,
+            "POS": variant._pos,
+            "REF": variant._ref,
+            "ALT": variant._alt,
+            "MAX_DS": 0.0
+        }
         try:
-            # synvep is hg38 (pos_GRCh38) abd hg19 (pos)
             with self._db as dbhandler:
-                spliceai_cursor = dbhandler._conn.cursor()
-                                
-                spliceai_query = """
-                SELECT chr as CHR, pos as POS, ref as REF, alt as ALT, INFO
-                FROM SPLICEAI
-                WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
-                """
-
-                # Prepare the parameters tuple
-                params = (variant._chr, variant._pos, variant._ref, variant._alt)
-
-                spliceai_cursor.execute(spliceai_query,params)
-                spliceai_rows = spliceai_cursor.fetchall()
-                spliceai_score = pd.DataFrame(spliceai_rows)
-                spliceai_score.columns = ['CHR','POS','REF','ALT','INFO']
-                if not spliceai_score.empty:
-                    vcf_header = "ALLELE|SYMBOL|DS_AG|DS_AL|DS_DG|DS_DL|DP_AG|DP_AL|DP_DG|DP_DL"
-                    vcf_header = vcf_header.split('|')
-                    spliceai_score[vcf_header] = spliceai_score['INFO'].str.split('|', expand=True)
-                    spliceai_score['MAX_DS'] = spliceai_score.apply(lambda row: max(row['DS_AG'],row['DS_AL'],row['DS_DG'],row['DS_DL']), axis=1)
-                    spliceai_score = spliceai_score[['CHR','POS','REF','ALT','MAX_DS']]
-                    spliceai_score = spliceai_score.to_dict(orient='records')
-
-        except Error as e:
-            logging.error(f"Connection to {self._db} failed")
-    
-        return spliceai_score
-
-    def get_prop_score(self,group = MetricsGroup.SYNVEP.name,gene = ''):
-        
-        """
-        
-        Get the SYMETRICS score for a given gene abd metrics group. The score was calculated from the pooled z proportion test of different
-        metrics group with their corresponding threhold:
-            - SYNVEP: 0.5
-            - GERP: 4
-            - CpG: 
-            - CpG_exon: 1
-            - RSCU:
-            - dRSCU:
-            - SpliceAI: 0.8
-            - SURF: 0.3
-        
-        Args:
-            gene: A string representing the HGNC Symbol of a gene
-        
-        Returns:
-            scores: A dictionary returning the pvalues and fdr acquired from the test and the score before and after scaling.
-        
-        Examples:
-
-            >>> from symetrics import *
-            >>> symetrics = Symetrics('symetrics.db')
-            >>> score = symetrics.get_prop_score(group = 'SYNVEP',gene = 'A1BG')
-        
-        """
-
-        scores = None
-        scaler = StandardScaler()
-        
-
-        if group in MetricsGroup.__members__:
-            scores = None
-            try:
-                with self._constraints as dbhandler:
-                            
-                    cursor = dbhandler._conn.cursor()
-                            
-                    query = f"SELECT GENES as GENE, pval as PVAL, fdr as FDR, z as SYMETRIC_SCORE, norm_z as NORM_SYMETRIC_SCORE FROM GNOMADv4{group} WHERE GENES = ?"
-                            
-                    params = (gene,)
-
-                    cursor.execute(query,params)
-                    rows = cursor.fetchall()
-                    scores = rows[0]
-                    scores = {
-                                "GENE": scores[0],
-                                "PVAL": scores[1],
-                                "FDR": scores[2],
-                                "SYMERIC_SCORE": scores[3],
-                                "NORM_SYMERIC_SCORE": scores[4]
-                    }
-
-            except Error as e:
-                    logging.error(e)
-                    logging.error(f"Connection to {self._constraints} failed")
-                
-                    
-        else:
-            logging.error(f'Group: {group} is not valid')       
-    
-        return scores    
-    
-    def get_gnomad_data(self, variant: VariantObject):
-
-        """
-        
-        Get the gnomad information related to the alleles of the given variant (allele count, allele number and allele frequency)
-        
-        Args:
-            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
-        
-        Returns:
-            gnomad_data: A dictionary containing the AC, AN, AF and variant information
-        
-        Examples:
-
-            >>> from symetrics import *
-            >>> symetrics = Symetrics('symetrics.db')
-            >>> variant_hg38 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg38)
-            >>> gnomad_hg38 = symetrics.get_gnomad_data(variant_hg38)
-
-        """
-
-
-        gnomad_conn = None
-        gnomad_data = None
-        
-
-        if variant._genome.name == GenomeReference.hg19.name:
-            #gnomad_conn = self.connect_to_database('data/gnomad2/gnomad_db.sqlite3')
-            print("Not possible in the current version please use the hg38 version of the variant")
-        elif variant._genome.name == GenomeReference.hg38.name:
-            
-
-            try:
-                with self._gnomad_db as dbhandler:
-                    gnomad_cursor = dbhandler._conn.cursor()
-                    
-                    #gnomad_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, AC, AN, AF FROM gnomad_db WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
-                    
-                    
-                    gnomad_query = """
-                        SELECT chr as CHR, pos as POS, ref as REF, alt as ALT, AC, AN, AF
-                        FROM gnomad_db
-                        WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
-                        """
-                    
-                    params = (variant._chr, variant._pos, variant._ref, variant._alt)
-                    
-                    gnomad_cursor.execute(gnomad_query, params)
-
-                    gnomad_rows = gnomad_cursor.fetchall()
-                    if len(gnomad_rows) > 0:
-                        gnomad_data = gnomad_rows[0]
-                        gnomad_data = {
-                            "CHR": gnomad_data[0],
-                            "POS": gnomad_data[1],
-                            "REF": gnomad_data[2],
-                            "ALT": gnomad_data[3],
-                            "AC": gnomad_data[4],
-                            "AN": gnomad_data[5],
-                            "AF": gnomad_data[6]
-                        }
-                    else:
-                        logging.error("Variant not found")
-
-            except Error as e:
-                logging.error(f"Connection to Gnomad failed")
-    
-        return gnomad_data
-
-    def get_gnomad_constraints(self,gene=''):
-        
-        """
-        
-        Get the constraints from gnomad (synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance) of a given gene
-        
-        Args:
-            gene: A string representing the HGNC Symbol of a gene
-        
-        Returns:
-            gnomad_data: A dictionary of the synonymous z score, missense z score, loss of function z scores, probability of loss of function intolerance)
-        
-        Examples:
-
-            >>> from symetrics import *
-            >>> symetrics = Symetrics('symetrics.db')
-            >>> gnomad = symetrics.get_gnomad_constraints(gene = 'A1BG')
-        
-        """
-
-        gnomad_data =  None
-
-        try:
-            with self._constraints as dbhandler:
-                            
                 cursor = dbhandler._conn.cursor()
-                            
-                query = f"SELECT * FROM GNOMADv4Constraints WHERE gene = ?"
-                            
-                params = (gene,)
-
-                cursor.execute(query,params)
+                query = """
+                    SELECT chr as CHR, pos as POS, ref as REF, alt as ALT, INFO
+                    FROM SPLICEAI
+                    WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
+                """
+                params = (variant._chr, variant._pos, variant._ref, variant._alt)
+                cursor.execute(query, params)
                 rows = cursor.fetchall()
-                gnomad_data = rows[0]
-                gnomad_data = {
-                                "gene": gnomad_data[0],
-                                "transcript": gnomad_data[1],
-                                "syn_z": gnomad_data[2],
-                                "mis_z": gnomad_data[3],
-                                "lof_z": gnomad_data[4],
-                                "pLI": gnomad_data[5]
-                }
-
+                if rows:
+                    df = pd.DataFrame(rows, columns=["CHR", "POS", "REF", "ALT", "INFO"])
+                    vcf_header = "ALLELE|SYMBOL|DS_AG|DS_AL|DS_DG|DS_DL|DP_AG|DP_AL|DP_DG|DP_DL".split('|')
+                    df[vcf_header] = df['INFO'].str.split('|', expand=True)
+                    df['MAX_DS'] = df[['DS_AG', 'DS_AL', 'DS_DG', 'DS_DL']].astype(float).max(axis=1)
+                    return df[['CHR', 'POS', "REF", "ALT", "MAX_DS"]].to_dict(orient='records')[0]
         except Error as e:
-                    logging.error(e)
-                    logging.error(f"Connection to {self._constraints} failed")
+            logging.error(f"Database error: {e}")
+        return default_values
 
-
-    
-        return gnomad_data
-
-    def liftover(self,variant: VariantObject):
-
+    def get_gnomad_data(self, variant: VariantObject):
+        default_values = {
+            "CHR": variant._chr,
+            "POS": variant._pos,
+            "REF": variant._ref,
+            "ALT": variant._alt,
+            "AC": 0,
+            "AN": 0,
+            "AF": 0.0
+        }
+        query = """
+            SELECT chr as CHR, pos as POS, ref as REF, alt as ALT, AC, AN, AF
+            FROM gnomad_db
+            WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
         """
-        
-        Perform a conversion of the variant position based from their original reference to a target reference. If hg38 is given, it will
-        be converted to hg19 and otherwise
+        columns = ["CHR", "POS", "REF", "ALT", "AC", "AN", "AF"]
+        return self.execute_query(query, (variant._chr, variant._pos, variant._ref, variant._alt), default_values, columns, self._gnomad_db)
 
-        Args:
-            variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant
-        
-        Returns:
-            liftover_variant: A VariantObject instance representing the chromosome, position, reference allele and alternative allele of a variant after liftover
-        
-        Exampless:
-
-            >>> from symetrics import *
-            >>> symetrics = Symetrics('symetrics.db')
-            >>> variant_hg19 = VariantObject(chr='7',pos='91763673',ref='C',alt='A',genome=GenomeReference.hg19)
-            >>> variant_hg38 = symetrics.liftover(variant_hg19)
-
+    def get_gnomad_constraints(self, gene=''):
+        default_values = {
+            "gene": gene,
+            "transcript": "N/A",
+            "syn_z": 0.0,
+            "mis_z": 0.0,
+            "lof_z": 0.0,
+            "pLI": 0.0
+        }
+        query = """
+            SELECT * FROM GNOMADv4Constraints WHERE gene = ?
         """
+        columns = ["gene", "transcript", "syn_z", "mis_z", "lof_z", "pLI"]
+        return self.execute_query(query, (gene,), default_values, columns, self._constraints)
 
-
+    def liftover(self, variant: VariantObject):
+        """
+        Perform liftover depending on the assembly.
+        If the assembly is hg19, return hg38; otherwise, return hg19.
+        """
         liftover_variant = None
-
         try:
-            # synvep is hg38 (pos_GRCh38) abd hg19 (pos)
             with self._db as dbhandler:
-                synvep_cursor = dbhandler._conn.cursor()
-                synvep_query = ''
-                if variant._genome == GenomeReference.hg38:
-                    new_reference = GenomeReference.hg19
-                    synvep_query = """
-                        SELECT chr as CHR, pos as POS, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
+                cursor = dbhandler._conn.cursor()
+                if variant._genome == GenomeReference.hg19:
+                    query = """
+                        SELECT chr as CHR, pos_GRCh38 as POS, ref as REF, alt as ALT
+                        FROM SYNVEP
+                        WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
+                    """
+                    new_reference = GenomeReference.hg38
+                else:
+                    query = """
+                        SELECT chr as CHR, pos as POS, ref as REF, alt as ALT
                         FROM SYNVEP
                         WHERE chr = ? AND pos_GRCh38 = ? AND ref = ? AND alt = ?
-                        """    
-
-                elif variant._genome == GenomeReference.hg19:
-                    new_reference = GenomeReference.hg38
-                    synvep_query = f'SELECT chr as CHR,pos_GRCh38 as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE chr = {variant._chr} AND pos = {variant._pos} AND ref = "{variant._ref}" AND alt = "{variant._alt}"'
-                    synvep_query = """
-                        SELECT chr as CHR, pos_GRCh38 as POS, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
-                        FROM SYNVEP
-                        WHERE chr = ? AND pos = ? AND ref = ? AND alt = ?
-                        """    
+                    """
+                    new_reference = GenomeReference.hg19
                 params = (variant._chr, variant._pos, variant._ref, variant._alt)
-                
-                synvep_cursor.execute(synvep_query,params)
-                synvep_rows = synvep_cursor.fetchall()
-                variant_info = synvep_rows[0]
-                liftover_variant = VariantObject(
-                    chr=variant_info[0],
-                    pos=variant_info[1],
-                    ref=variant_info[2],
-                    alt=variant_info[3],
-                    genome=new_reference
-                )
-            
+                cursor.execute(query, params)
+                row = cursor.fetchone()
+                if row:
+                    liftover_variant = VariantObject(
+                        chr=row[0],
+                        pos=row[1],
+                        ref=row[2],
+                        alt=row[3],
+                        genome=new_reference
+                    )
         except Error as e:
-            logging.error(f"Connection to {self._db} failed")
-    
-        return liftover_variant
-    
+            logging.error(f"Liftover error: {e}")
+        return liftover_variant or variant
 
-    def get_variant_list(self,gene: str):
 
+    def get_prop_score(self, group=MetricsGroup.SYNVEP.name, gene=''):
+        default_values = {
+            "GENE": gene,
+            "PVAL": 1.0,
+            "FDR": 1.0,
+            "SYMETRIC_SCORE": 0.0,
+            "NORM_SYMETRIC_SCORE": 0.0
+        }
+        if group in MetricsGroup.__members__:
+            query = f"""
+                SELECT GENES as GENE, pval as PVAL, fdr as FDR, z as SYMETRIC_SCORE, norm_z as NORM_SYMETRIC_SCORE
+                FROM GNOMADv4{group}
+                WHERE GENES = ?
+            """
+            columns = ["GENE", "PVAL", "FDR", "SYMETRIC_SCORE", "NORM_SYMETRIC_SCORE"]
+            return self.execute_query(query, (gene,), default_values, columns,self._constraints)
+        else:
+            logging.error(f"Group: {group} is skipped")
+        return default_values
+
+    def get_all_prop_score(self, group=MetricsGroup.SYNVEP.name):
+        scores = (0, 1)
+        if group in MetricsGroup.__members__:
+            try:
+                with self._constraints as dbhandler:
+                    cursor = dbhandler._conn.cursor()
+                    query = f"""
+                        SELECT z as SYMETRIC_SCORE
+                        FROM GNOMADv4{group}
+                    """
+                    cursor.execute(query)
+                    rows = cursor.fetchall()
+                    rows = [r[0] for r in rows]
+                    scores = (np.mean(rows), np.std(rows))
+            except Error as e:
+                logging.error(f"Database error: {e}")
+        else:
+            logging.error(f"Group: {group} is skipped")
+        return scores
+
+    def get_variant_list(self, gene: str):
         """
-        
-        Get a list of variants associated with the gene
-
-        Args:
-            gene: A string type input referring to the gene of interest
-        
-        Returns:
-            variant_list: A list of all variants under the gene
-                
-        Exampless:
-
-            >>> from symetrics import *
-            >>> symetrics = Symetrics('symetrics.db')
-            >>> variant_list = symetrics.get_variant_list('A1BG')
-
+        Get a list of variants associated with the gene.
         """
-
-
-        variant_list = None
-
+        variant_list = []
         try:
-            # synvep is hg38 (pos_GRCh38) abd hg19 (pos)
             with self._db as dbhandler:
-                synvep_cursor = dbhandler._conn.cursor()
-                synvep_query = ''
-                synvep_query = f'SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE HGNC_gene_symbol = "{gene}"'                    
-                
-                query = "SELECT chr as CHR,pos as POS,ref as REF,alt as ALT, HGNC_gene_symbol as GENE,synVep as SYNVEP FROM SYNVEP WHERE HGNC_gene_symbol = ?"
-                            
+                cursor = dbhandler._conn.cursor()
+                query = """
+                    SELECT chr as CHR, pos_GRCh38 as POS, pos as POS_HG19, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
+                    FROM SYNVEP
+                    WHERE HGNC_gene_symbol = ?
+                """
                 params = (gene,)
-                
-                
-                synvep_cursor.execute(query,params)
-                synvep_rows = synvep_cursor.fetchall()
-                variant_list = synvep_rows
-            
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
+                if rows:
+                    columns = ["CHR", "POS", "POS_HG19", "REF", "ALT", "GENE", "SYNVEP"]
+                    variant_list = [dict(zip(columns, row)) for row in rows]
         except Error as e:
-            logging.error(f"Connection to {self._db} failed")
-    
+            logging.error(f"Database error: {e}")
         return variant_list
-        
 
+    def predict_probability(self, scores: dict):
+        pred = None
+        try:
+            pred = self._model.predict(scores)
+        except Exception as e:
+            logging.error(f"Model error: {e}")
+        return pred
+
+    def get_variant_batch(self, gene: str, start: int, end: int):
+        """
+        Get a batch of variants associated with the gene.
+        """
+        variant_list = []
+        try:
+            with self._db as dbhandler:
+                cursor = dbhandler._conn.cursor()
+                query = """
+                    SELECT chr as CHR, pos_GRCh38 as POS, pos as POS_HG19, ref as REF, alt as ALT, HGNC_gene_symbol as GENE, synVep as SYNVEP
+                    FROM SYNVEP
+                    WHERE HGNC_gene_symbol = ?
+                    LIMIT ? OFFSET ?
+                """
+                params = (gene, end - start, start)
+                cursor.execute(query, params)
+                rows = cursor.fetchall()
+                if rows:
+                    columns = ["CHR", "POS", "POS_HG19", "REF", "ALT", "GENE", "SYNVEP"]
+                    variant_list = [dict(zip(columns, row)) for row in rows]
+        except Error as e:
+            logging.error(f"Database error: {e}")
+        return variant_list

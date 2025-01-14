@@ -1,6 +1,7 @@
 setup.py
 symetrics/__init__.py
 symetrics/dbcontext.py
+symetrics/modelcontext.py
 symetrics/symetrics_api.py
 symetrics.egg-info/PKG-INFO
 symetrics.egg-info/SOURCES.txt

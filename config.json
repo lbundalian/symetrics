@@ -3,8 +3,8 @@
   
     "symetrics": "C:/Users/rosen/Downloads/symetrics_project/data/symetrics.sqlite3",
     "gnomad":  "C:/Users/rosen/Downloads/symetrics_project/data/gnomad-lite.sqlite3",
-    "constraints": "C:/Users/rosen/Downloads/symetrics_project/data/genewise/genewise.sqlite3"
-    
+    "constraints": "C:/Users/rosen/Downloads/symetrics_project/data/genewise/genewise.sqlite3",
+    "model": "C:/Users/rosen/Downloads/symetrics_project/data/calibrated_extratrees_symetrics.pkl"
   }
 }
   
