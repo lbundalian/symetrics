@@ -239,7 +239,6 @@ class Symetrics(ISymetrics):
             logging.error(f"Liftover error: {e}")
         return liftover_variant or variant
 
-
     def get_prop_score(self, group=MetricsGroup.SYNVEP.name, gene=''):
         default_values = {
             "GENE": gene,

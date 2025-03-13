@@ -5,14 +5,17 @@ import time
 cfg = os.path.join(os.path.dirname(__file__), 'config.json')
 api = Symetrics(cfg)
 
-chr_val = '1'
-pos_val = '46194860'
+chr_val = 'X'
+pos_val = '153906421 '
 ref_val = 'G'
-alt_val = 'A'
+alt_val = 'C'
 assy_val = 'hg38'
 
-variant = VariantObject(chr='1',pos='46194860',ref='G',alt='A',genome=GenomeReference.hg38)
+variant = VariantObject(chr=chr_val,pos=pos_val,ref=ref_val,alt=alt_val,genome=GenomeReference.hg38)
 assy = "hg38"
+
+
+t = api.get_prop_score(MetricsGroup.SPLICEAI,"GPR39")
 
 s = time.time()
 
@@ -33,7 +36,7 @@ metrics = {
         'GNOMAD': api.get_gnomad_data(variant=variant_val)
 }
 
-t = api.get_prop_score(MetricsGroup.SYNVEP.name,'A1BG')
+# t = api.get_prop_score(MetricsGroup.SYNVEP.name,'A1BG')
 # Helper function for safe float conversion
 def safe_float(value):
         return float(value) if value and value != 0 else 0

@@ -15,6 +15,8 @@ class MetricsGroup(Enum):
     SPLICEAI = auto()
 
     SPLICE = auto()
+    SYMETRICS = auto()
+    MES = auto()
     CPGEXON = auto()
     CPGLogit = auto()
 
